@@ -1,11 +1,11 @@
-// src/components/RegisterForm.jsx
+// ✅ Updated RegisterForm.jsx to use secureAxios and avoid hardcoded localhost
 import { useState } from "react";
-import axios from "axios";
+import secureAxios from "../utils/secureAxios"; // 👈 uses VITE_API_URL
 
 const RegisterForm = ({ email, onSuccess, onSwitchToLogin }) => {
   const [form, setForm] = useState({
     username: "",
-    email: email || "", // prefill if passed
+    email: email || "",
     password: "",
   });
 
@@ -24,11 +24,7 @@ const RegisterForm = ({ email, onSuccess, onSwitchToLogin }) => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        form,
-        { withCredentials: true }
-      );
+      const res = await secureAxios.post("/auth/register", form); // ✅ uses baseURL + credentials
       setMessage(res.data.message); // e.g. "Check your email..."
       onSuccess?.(); // Optional callback
     } catch (err) {
