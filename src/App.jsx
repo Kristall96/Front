@@ -9,7 +9,7 @@ import HomePage from "./pages/HomePage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 function App() {
   return (
-    <Router basename="/Front">
+    <Router>
       <div className="p-4">
         <Routes>
           <Route path="/" element={<HomePage />} />
