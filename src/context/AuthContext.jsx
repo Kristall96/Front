@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Try to refresh access token on initial load
+  // ✅ Refresh session on initial load
   useEffect(() => {
     const refresh = async () => {
       try {
@@ -17,16 +17,21 @@ export const AuthProvider = ({ children }) => {
           withCredentials: true,
         });
 
-        if (res.data?.user && res.data?.accessToken) {
-          setUser(res.data.user);
-          setAccessToken(res.data.accessToken);
-          console.log("✅ Session restored:", res.data.user.email);
+        const { user, accessToken } = res.data;
+        if (user && accessToken) {
+          setUser(user);
+          setAccessToken(accessToken);
+          if (import.meta.env.DEV)
+            console.log("✅ Session restored:", user.email);
         } else {
-          console.warn("⚠️ Invalid session data returned from /auth/refresh");
+          if (import.meta.env.DEV)
+            console.warn("⚠️ Invalid /auth/refresh response");
         }
       } catch (err) {
-        const msg = err.response?.data?.message || err.message;
-        console.warn("⚠️ Refresh failed:", msg);
+        if (import.meta.env.DEV) {
+          const msg = err.response?.data?.message || err.message;
+          console.warn("⚠️ Refresh failed:", msg);
+        }
         setUser(null);
         setAccessToken("");
       } finally {
@@ -37,7 +42,6 @@ export const AuthProvider = ({ children }) => {
     refresh();
   }, []);
 
-  // ✅ Login
   const login = async (email, password) => {
     const res = await secureAxios.post(
       "/auth/login",
@@ -48,7 +52,6 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
-  // ✅ Register
   const register = async (formData) => {
     const res = await secureAxios.post("/auth/register", formData, {
       withCredentials: true,
@@ -57,12 +60,11 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
-  // ✅ Logout
   const logout = async () => {
     try {
       await secureAxios.post("/auth/logout", {}, { withCredentials: true });
     } catch (err) {
-      console.warn("Logout error:", err.message);
+      if (import.meta.env.DEV) console.warn("Logout error:", err.message);
     } finally {
       setUser(null);
       setAccessToken("");
