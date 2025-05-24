@@ -7,7 +7,28 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState("");
-  const [loading, setLoading] = useState(true); // prevent UI flicker on load
+  const [loading, setLoading] = useState(true);
+
+  // ✅ On initial load, check refresh token
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const res = await secureAxios.get("/auth/refresh", {
+          withCredentials: true,
+        });
+        setUser(res.data.user || null);
+        setAccessToken(res.data.accessToken || "");
+      } catch (err) {
+        console.warn("Session expired or no refresh token:", err.message);
+        setUser(null);
+        setAccessToken("");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    refresh();
+  }, []);
 
   // ✅ Login
   const login = async (email, password) => {
@@ -36,26 +57,6 @@ export const AuthProvider = ({ children }) => {
     setAccessToken("");
   };
 
-  // ✅ Refresh on load
-  const refresh = async () => {
-    try {
-      const res = await secureAxios.get("/auth/refresh", {
-        withCredentials: true,
-      });
-      setUser(res.data.user || null); // if user is returned
-      setAccessToken(res.data.accessToken || "");
-    } catch (err) {
-      console.warn("No active session:", err.message);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    refresh();
-  }, []);
-
   return (
     <AuthContext.Provider
       value={{
@@ -64,11 +65,11 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        refresh,
         loading,
         isAuthenticated: !!user,
       }}
     >
+      {/* Prevent rendering until refresh is complete */}
       {!loading && children}
     </AuthContext.Provider>
   );
