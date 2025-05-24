@@ -16,10 +16,10 @@ export const AuthProvider = ({ children }) => {
         const res = await secureAxios.get("/auth/refresh", {
           withCredentials: true,
         });
-        setUser(res.data.user || null);
+        setUser(res.data.user || null); // ✅ Make sure backend returns this
         setAccessToken(res.data.accessToken || "");
       } catch (err) {
-        console.warn("🔒 Refresh error:", err.message);
+        console.warn("Session expired:", err.message);
         setUser(null);
         setAccessToken("");
       } finally {
