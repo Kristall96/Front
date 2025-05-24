@@ -6,5 +6,5 @@ const secureAxios = axios.create({
   withCredentials: true, // send/receive cookies (for refreshToken)
 });
 console.log("✔️ Axios baseURL:", import.meta.env.VITE_API_URL);
-
+console.log("✔️ Axios withCredentials:", import.meta.env.VITE_API_URL);
 export default secureAxios;
