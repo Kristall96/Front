@@ -1,4 +1,3 @@
-// components/CheckEmailStep.jsx
 import { useState } from "react";
 import secureAxios from "../utils/secureAxios";
 
@@ -17,36 +16,46 @@ const CheckEmailStep = ({ email, setEmail, setStep }) => {
       );
 
       if (res.data.exists) {
-        setStep("login"); // Go to login form if email exists
+        setStep("login");
       } else {
-        setStep("register"); // Go to register form if not
+        setStep("register");
       }
     } catch (err) {
-      const message =
+      setError(
         err.response?.data?.message ||
-        "Something went wrong checking the email.";
-      setError(message);
+          "Something went wrong checking the email."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleCheck} className="w-full">
-      <h2 className="text-xl font-semibold mb-4">Enter your email</h2>
+    <form
+      onSubmit={handleCheck}
+      className="w-full bg-neutral-900 text-gray-100 p-6 rounded-xl shadow-lg space-y-4"
+    >
+      <h2 className="text-xl font-bold">Enter your email</h2>
+
       <input
         type="email"
         value={email}
         required
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-2 border rounded mb-3"
+        className="w-full px-4 py-2 rounded-md bg-neutral-800 border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         placeholder="you@example.com"
       />
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+        className={`w-full py-2 rounded-md font-medium transition ${
+          loading
+            ? "bg-blue-800 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        } text-white`}
       >
         {loading ? "Checking..." : "Continue"}
       </button>

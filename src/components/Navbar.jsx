@@ -1,29 +1,97 @@
-// src/components/Navbar.jsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./LoginModal";
 import LogoutButton from "./LogoutButton";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
-  const { user } = useAuth(); // 👈 get logged-in user from context
+  const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLinks = [
+    { label: "Home", path: "/" },
+    { label: "Shop", path: "/shop" },
+    { label: "Blog", path: "/blog" },
+    { label: "Contact", path: "/contact" },
+  ];
 
   return (
-    <header className="bg-white border-b shadow-sm p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold text-gray-800">My App</h1>
+    <header className="bg-black text-white shadow-md border-b border-neutral-800">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-bold tracking-tight">
+          MyApp
+        </Link>
 
-      <div>
-        {user ? (
-          <LogoutButton />
-        ) : (
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Sign In
-          </button>
-        )}
+        {/* Desktop Nav (Centered using absolute/relative container) */}
+        <div className="hidden md:flex justify-center flex-1 relative">
+          <nav className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="hover:text-blue-400 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* Right Side - Auth */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <LogoutButton />
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white transition-colors"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Menu Toggle */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden text-white"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden bg-black border-t border-gray-700 px-4 pb-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className="block py-2 text-white hover:text-blue-400"
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {user ? (
+            <LogoutButton />
+          ) : (
+            <button
+              onClick={() => {
+                setShowLoginModal(true);
+                setMenuOpen(false);
+              }}
+              className="mt-2 w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white transition-colors"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
+      )}
 
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} />
