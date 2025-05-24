@@ -9,9 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Refresh session on initial load
+  // ✅ Restore session from refreshToken on mount
   useEffect(() => {
-    const refresh = async () => {
+    const restoreSession = async () => {
       try {
         const res = await secureAxios.get("/auth/refresh", {
           withCredentials: true,
@@ -21,16 +21,16 @@ export const AuthProvider = ({ children }) => {
         if (user && accessToken) {
           setUser(user);
           setAccessToken(accessToken);
-          if (import.meta.env.DEV)
+          if (import.meta.env.DEV) {
             console.log("✅ Session restored:", user.email);
+          }
         } else {
-          if (import.meta.env.DEV)
-            console.warn("⚠️ Invalid /auth/refresh response");
+          throw new Error("Invalid refresh response");
         }
       } catch (err) {
         if (import.meta.env.DEV) {
           const msg = err.response?.data?.message || err.message;
-          console.warn("⚠️ Refresh failed:", msg);
+          console.warn("⚠️ Session restore failed:", msg);
         }
         setUser(null);
         setAccessToken("");
@@ -39,9 +39,10 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    refresh();
+    restoreSession();
   }, []);
 
+  // ✅ Login
   const login = async (email, password) => {
     const res = await secureAxios.post(
       "/auth/login",
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
+  // ✅ Register
   const register = async (formData) => {
     const res = await secureAxios.post("/auth/register", formData, {
       withCredentials: true,
@@ -60,16 +62,28 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
+  // ✅ Logout
   const logout = async () => {
     try {
       await secureAxios.post("/auth/logout", {}, { withCredentials: true });
     } catch (err) {
-      if (import.meta.env.DEV) console.warn("Logout error:", err.message);
+      if (import.meta.env.DEV) {
+        console.warn("Logout error:", err.message);
+      }
     } finally {
       setUser(null);
       setAccessToken("");
     }
   };
+
+  // ✅ Guard against UI rendering until session is known
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <span className="text-sm text-gray-400">Checking session...</span>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider
@@ -83,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
