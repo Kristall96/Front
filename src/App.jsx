@@ -2,11 +2,6 @@
 import { useAuth } from "./context/AuthContext";
 import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import ShopPage from "./pages/ShopPage";
-import BlogPage from "./pages/BlogPage";
-import ContactPage from "./pages/ContactPage";
-import Dashboard from "./pages/Dashboard";
-import LoginPage from "./pages/LoginPage";
 import Navbar from "./components/Navbar";
 
 function App() {
@@ -22,10 +17,6 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/login" element={<LoginPage />} />
 
         {/* Protected Route Example */}
         <Route
