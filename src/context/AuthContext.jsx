@@ -2,24 +2,31 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import secureAxios from "../utils/secureAxios";
 
-const AuthContext = createContext(null); // explicitly set default null
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Refresh session on mount
+  // ✅ Try to refresh access token on initial load
   useEffect(() => {
     const refresh = async () => {
       try {
         const res = await secureAxios.get("/auth/refresh", {
           withCredentials: true,
         });
-        setUser(res.data.user || null); // ✅ Make sure backend returns this
-        setAccessToken(res.data.accessToken || "");
+
+        if (res.data?.user && res.data?.accessToken) {
+          setUser(res.data.user);
+          setAccessToken(res.data.accessToken);
+          console.log("✅ Session restored:", res.data.user.email);
+        } else {
+          console.warn("⚠️ Invalid session data returned from /auth/refresh");
+        }
       } catch (err) {
-        console.warn("Session expired:", err.message);
+        const msg = err.response?.data?.message || err.message;
+        console.warn("⚠️ Refresh failed:", msg);
         setUser(null);
         setAccessToken("");
       } finally {
@@ -52,9 +59,14 @@ export const AuthProvider = ({ children }) => {
 
   // ✅ Logout
   const logout = async () => {
-    await secureAxios.post("/auth/logout", {}, { withCredentials: true });
-    setUser(null);
-    setAccessToken("");
+    try {
+      await secureAxios.post("/auth/logout", {}, { withCredentials: true });
+    } catch (err) {
+      console.warn("Logout error:", err.message);
+    } finally {
+      setUser(null);
+      setAccessToken("");
+    }
   };
 
   return (
@@ -74,10 +86,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Safe hook: throws clear error if used outside provider
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === null) {
+  if (!context) {
     throw new Error("useAuth must be used inside <AuthProvider>");
   }
   return context;
