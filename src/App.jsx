@@ -1,38 +1,27 @@
 // src/App.jsx
+import { Routes, Route } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-import { Routes, Route, Navigate } from "react-router-dom";
+
+// Pages
 import HomePage from "./pages/HomePage";
-import Navbar from "./components/Navbar";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 function App() {
-  const { loading, isAuthenticated } = useAuth();
+  const { loading } = useAuth();
 
-  // Wait until refresh check completes to prevent flicker or false redirects
-  if (loading)
-    return <div className="p-10 text-center">Loading session...</div>;
+  if (loading) {
+    return <div className="p-10 text-center">Checking session...</div>; // prevents early render
+  }
 
   return (
-    <>
-      <Navbar />
+    <div>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-
-        {/* Protected Route Example */}
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />
-          }
-        />
-
-        {/* Catch-all 404 */}
-        <Route
-          path="*"
-          element={<div className="p-10 text-center">404 - Page Not Found</div>}
-        />
+        <Route path="/reset-password/confirm" element={<ResetPasswordPage />} />
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
       </Routes>
-    </>
+    </div>
   );
 }
 

@@ -2,14 +2,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import secureAxios from "../utils/secureAxios";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null); // explicitly set default null
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ On initial load, check refresh token
+  // ✅ Refresh session on mount
   useEffect(() => {
     const refresh = async () => {
       try {
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         setUser(res.data.user || null);
         setAccessToken(res.data.accessToken || "");
       } catch (err) {
-        console.warn("Session expired or no refresh token:", err.message);
+        console.warn("🔒 Refresh error:", err.message);
         setUser(null);
         setAccessToken("");
       } finally {
@@ -69,10 +69,16 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
       }}
     >
-      {/* Prevent rendering until refresh is complete */}
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// ✅ Safe hook: throws clear error if used outside provider
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === null) {
+    throw new Error("useAuth must be used inside <AuthProvider>");
+  }
+  return context;
+};
