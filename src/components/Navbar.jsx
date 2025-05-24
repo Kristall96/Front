@@ -6,7 +6,7 @@ import LogoutButton from "./LogoutButton";
 import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // 👈 include loading
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -17,15 +17,15 @@ const Navbar = () => {
     { label: "Contact", path: "/contact" },
   ];
 
+  if (loading) return null; // ✅ avoid flicker or false UI while checking session
+
   return (
     <header className="bg-black text-white shadow-md border-b border-neutral-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
         <Link to="/" className="text-2xl font-bold tracking-tight">
           MyApp
         </Link>
 
-        {/* Desktop Nav (Centered using absolute/relative container) */}
         <div className="hidden md:flex justify-center flex-1 relative">
           <nav className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-6">
             {navLinks.map((link) => (
@@ -40,7 +40,6 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Right Side - Auth */}
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <LogoutButton />
@@ -54,7 +53,6 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-white"
@@ -63,7 +61,6 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-black border-t border-gray-700 px-4 pb-4">
           {navLinks.map((link) => (
