@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
@@ -6,9 +7,16 @@ import UserManagement from "./sections/UserManagement";
 import Navbar from "../../components/Navbar";
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("profile");
   const [userData, setUserData] = useState(null);
   const [adminStats, setAdminStats] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get current tab from URL (default to 'profile')
+  const activeTab = searchParams.get("tab") || "profile";
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   const fetchUser = async () => {
     try {
