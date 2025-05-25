@@ -6,9 +6,7 @@ const ModeratorDashboard = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    secureAxios
-      .get("/api/dashboard/moderator")
-      .then((res) => setData(res.data));
+    secureAxios.get("/dashboard/moderator").then((res) => setData(res.data));
   }, []);
 
   return (

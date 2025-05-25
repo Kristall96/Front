@@ -6,7 +6,7 @@ const AdminDashboard = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    secureAxios.get("/api/dashboard/admin").then((res) => setData(res.data));
+    secureAxios.get("/dashboard/admin").then((res) => setData(res.data));
   }, []);
 
   return (

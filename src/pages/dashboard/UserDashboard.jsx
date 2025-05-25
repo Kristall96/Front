@@ -6,7 +6,7 @@ const UserDashboard = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    secureAxios.get("/api/dashboard/user").then((res) => setData(res.data));
+    secureAxios.get("/dashboard/user").then((res) => setData(res.data));
   }, []);
 
   return (
