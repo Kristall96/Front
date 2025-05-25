@@ -43,21 +43,36 @@ const ProfileSection = ({ user, refreshUser }) => {
   };
 
   return (
-    <div className="flex justify-center items-start min-h-screen bg-gray-100 px-4 py-8">
+    <div className="flex justify-center items-start min-h-screen bg-gray-100 px-4 py-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-5xl space-y-10 bg-white p-8 rounded-2xl shadow-md border border-gray-200"
+        className="w-full max-w-5xl space-y-10 bg-white p-10 rounded-2xl shadow-xl border border-gray-300"
       >
-        <h2 className="text-3xl font-bold text-black mb-6">
-          Edit Your Profile
-        </h2>
+        {/* 🖼️ Avatar & Level */}
+        <div className="flex items-center gap-6 mb-8">
+          <img
+            src={
+              formData.profileImage || "https://example.com/default-avatar.png"
+            }
+            alt="Profile Avatar"
+            className="w-24 h-24 rounded-full border-2 border-black shadow"
+          />
+          <div>
+            <h2 className="text-3xl font-bold text-black mb-1">
+              Edit Your Profile
+            </h2>
+            <p className="text-sm text-gray-600 font-medium">
+              Level {formData.level || 1}
+            </p>
+          </div>
+        </div>
 
-        {/* 🧍 Identity Info */}
-        <fieldset className="border border-black/20 p-4 rounded-md">
-          <legend className="font-semibold text-lg text-black mb-2">
+        {/* Identity Info */}
+        <fieldset className="border border-black/20 p-6 rounded-lg">
+          <legend className="font-semibold text-xl text-black mb-4">
             Identity Info
           </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <input
               name="username"
               value={formData.username || ""}
@@ -86,22 +101,23 @@ const ProfileSection = ({ user, refreshUser }) => {
               placeholder="Last Name"
               className="input"
             />
-            <input
+            <textarea
               name="bio"
               value={formData.bio || ""}
               onChange={handleChange}
               placeholder="Bio"
-              className="input col-span-full"
+              rows={2}
+              className="input col-span-full resize-none"
             />
           </div>
         </fieldset>
 
-        {/* ☎ Contact Info */}
-        <fieldset className="border border-black/20 p-4 rounded-md">
-          <legend className="font-semibold text-lg text-black mb-2">
+        {/* Contact Info */}
+        <fieldset className="border border-black/20 p-6 rounded-lg">
+          <legend className="font-semibold text-xl text-black mb-4">
             Contact Info
           </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <input
               name="email"
               value={formData.email || ""}
@@ -133,12 +149,12 @@ const ProfileSection = ({ user, refreshUser }) => {
           </div>
         </fieldset>
 
-        {/* 🏠 Permanent Address */}
-        <fieldset className="border border-black/20 p-4 rounded-md">
-          <legend className="font-semibold text-lg text-black mb-2">
+        {/* Permanent Address */}
+        <fieldset className="border border-black/20 p-6 rounded-lg">
+          <legend className="font-semibold text-xl text-black mb-4">
             Permanent Address
           </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <input
               name="continent"
               value={formData.continent || ""}
@@ -191,12 +207,12 @@ const ProfileSection = ({ user, refreshUser }) => {
           </div>
         </fieldset>
 
-        {/* 📦 Delivery Address */}
-        <fieldset className="border border-black/20 p-4 rounded-md">
-          <legend className="font-semibold text-lg text-black mb-2">
+        {/* Delivery Address */}
+        <fieldset className="border border-black/20 p-6 rounded-lg">
+          <legend className="font-semibold text-xl text-black mb-4">
             Delivery Address
           </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <input
               name="deliveryFirstName"
               value={formData.deliveryFirstName || ""}
@@ -277,30 +293,7 @@ const ProfileSection = ({ user, refreshUser }) => {
           </div>
         </fieldset>
 
-        {/* 📷 Additional Info */}
-        <fieldset className="border border-black/20 p-4 rounded-md">
-          <legend className="font-semibold text-lg text-black mb-2">
-            Additional Info
-          </legend>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              name="profileImage"
-              value={formData.profileImage || ""}
-              onChange={handleChange}
-              placeholder="Profile Image URL"
-              className="input"
-            />
-            <input
-              name="level"
-              value={formData.level || ""}
-              onChange={handleChange}
-              placeholder="User Level"
-              className="input"
-            />
-          </div>
-        </fieldset>
-
-        {/* 💾 Submit Button */}
+        {/* Submit Button */}
         <div className="flex items-center gap-4">
           <button
             type="submit"
