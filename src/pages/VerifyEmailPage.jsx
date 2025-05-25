@@ -14,9 +14,7 @@ const VerifyEmailPage = () => {
       try {
         const res = await axios.get(`/auth/verify-email/${token}`);
         setStatus(res.data.message || "Email verified successfully.");
-
-        // Redirect to login after short delay
-        setTimeout(() => navigate("/login"), 2500);
+        setTimeout(() => navigate("/"), 2500);
       } catch (err) {
         const msg =
           err.response?.data?.message || err.message || "Verification failed.";
@@ -29,10 +27,19 @@ const VerifyEmailPage = () => {
   }, [token, navigate]);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>{status}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!error && <p>You will be redirected to the login page shortly...</p>}
+    <div className="min-h-screen flex items-center justify-center bg-black text-white font-sans px-4">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-lg p-8 max-w-md w-full text-center">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-teal-400">
+          {status}
+        </h2>
+        {error ? (
+          <p className="text-red-400">{error}</p>
+        ) : (
+          <p className="text-zinc-300">
+            You will be redirected to the login page shortly...
+          </p>
+        )}
+      </div>
     </div>
   );
 };
