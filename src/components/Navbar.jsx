@@ -18,7 +18,20 @@ const Navbar = () => {
     { label: "Contact", path: "/contact" },
   ];
 
-  if (loading) return null; // Prevent early UI mismatch
+  // 🔁 Resolve user dashboard route based on role
+  const getDashboardPath = () => {
+    if (!user) return "/";
+    switch (user.role) {
+      case "admin":
+        return "/dashboard/admin";
+      case "moderator":
+        return "/dashboard/moderator";
+      default:
+        return "/dashboard/user";
+    }
+  };
+
+  if (loading) return null;
 
   return (
     <header className="bg-black text-white shadow-md border-b border-neutral-800">
@@ -43,10 +56,18 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Auth buttons (desktop) */}
+        {/* Auth Buttons (Desktop) */}
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
-            <LogoutButton />
+            <>
+              <Link
+                to={getDashboardPath()}
+                className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded transition-colors"
+              >
+                Dashboard
+              </Link>
+              <LogoutButton />
+            </>
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
@@ -57,7 +78,7 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile menu toggle */}
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-white"
@@ -66,7 +87,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-black border-t border-gray-700 px-4 pb-4">
           {navLinks.map((link) => (
@@ -81,7 +102,16 @@ const Navbar = () => {
           ))}
 
           {user ? (
-            <LogoutButton />
+            <>
+              <Link
+                to={getDashboardPath()}
+                onClick={() => setMenuOpen(false)}
+                className="block py-2 text-white hover:text-blue-400"
+              >
+                Dashboard
+              </Link>
+              <LogoutButton />
+            </>
           ) : (
             <button
               onClick={() => {
@@ -96,7 +126,7 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Login Modal */}
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} />
       )}
