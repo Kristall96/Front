@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import secureAxios from "../utils/secureAxios";
+import { setAccessTokenBridge, setRefreshFunction } from "../utils/tokenBridge";
 
 const AuthContext = createContext(null);
 
@@ -9,7 +10,17 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Restore session from refreshToken on mount
+  // Sync accessToken with axios bridge
+  useEffect(() => {
+    setAccessTokenBridge(accessToken);
+  }, [accessToken]);
+
+  // Provide refresh function to axios bridge
+  useEffect(() => {
+    setRefreshFunction(refreshAccessToken);
+  }, []);
+
+  // ✅ Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
       try {
@@ -18,19 +29,14 @@ export const AuthProvider = ({ children }) => {
         });
 
         const { user, accessToken } = res.data;
-        if (user && accessToken) {
-          setUser(user);
-          setAccessToken(accessToken);
-          if (import.meta.env.DEV) {
-            console.log("✅ Session restored:", user.email);
-          }
-        } else {
-          throw new Error("Invalid refresh response");
+        setUser(user);
+        setAccessToken(accessToken);
+        if (import.meta.env.DEV) {
+          console.log("✅ Session restored:", user.email);
         }
       } catch (err) {
         if (import.meta.env.DEV) {
-          const msg = err.response?.data?.message || err.message;
-          console.warn("⚠️ Session restore failed:", msg);
+          console.warn("⚠️ Session restore failed:", err.message);
         }
         setUser(null);
         setAccessToken("");
@@ -42,7 +48,18 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, []);
 
-  // ✅ Login
+  // ✅ Access Token Refresh Logic (called from Axios)
+  const refreshAccessToken = async () => {
+    const res = await secureAxios.post(
+      "/auth/refresh",
+      {},
+      { withCredentials: true }
+    );
+    setAccessToken(res.data.accessToken);
+    setUser(res.data.user);
+    return res.data.accessToken;
+  };
+
   const login = async (email, password) => {
     const res = await secureAxios.post(
       "/auth/login",
@@ -53,7 +70,6 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
-  // ✅ Register
   const register = async (formData) => {
     const res = await secureAxios.post("/auth/register", formData, {
       withCredentials: true,
@@ -62,7 +78,6 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(res.data.accessToken);
   };
 
-  // ✅ Logout
   const logout = async () => {
     try {
       await secureAxios.post("/auth/logout", {}, { withCredentials: true });
@@ -76,7 +91,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Guard against UI rendering until session is known
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
