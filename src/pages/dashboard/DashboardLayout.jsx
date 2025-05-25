@@ -5,15 +5,24 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
 
   const links = {
     admin: [
+      { key: "profile", label: "My Profile" },
+      { key: "orders", label: "My Orders" },
+      { key: "wishlist", label: "Wishlist" },
       { key: "overview", label: "Overview" },
       { key: "users", label: "Manage Users" },
       { key: "orders", label: "Orders" },
     ],
     moderator: [
+      { key: "profile", label: "My Profile" },
+      { key: "orders", label: "My Orders" },
+      { key: "wishlist", label: "Wishlist" },
       { key: "panel", label: "Moderation Panel" },
       { key: "complaints", label: "Complaints" },
     ],
     user: [
+      { key: "profile", label: "My Profile" },
+      { key: "orders", label: "My Orders" },
+      { key: "wishlist", label: "Wishlist" },
       { key: "profile", label: "My Profile" },
       { key: "orders", label: "My Orders" },
       { key: "wishlist", label: "Wishlist" },
