@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
+import UserManagement from "./sections/UserManagement";
 import Navbar from "../../components/Navbar";
 
 const AdminDashboard = () => {
@@ -47,11 +48,7 @@ const AdminDashboard = () => {
           <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
         );
       case "users":
-        return (
-          <p className="text-sm text-gray-600">
-            👥 User management coming soon...
-          </p>
-        );
+        return <UserManagement />;
       case "overview":
         return adminStats ? (
           <div className="bg-white p-4 rounded shadow">
