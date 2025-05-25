@@ -53,12 +53,11 @@ const ProfileSection = ({ user, refreshUser }) => {
         </h2>
 
         {/* 🧍 Identity Info */}
-        <fieldset className="border border-black/10 p-4 rounded-md">
+        <fieldset className="border border-black/20 p-4 rounded-md">
           <legend className="font-semibold text-lg text-black mb-2">
             Identity Info
           </legend>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* input classes are unified */}
             <input
               name="username"
               value={formData.username || ""}
@@ -74,17 +73,31 @@ const ProfileSection = ({ user, refreshUser }) => {
               className="input"
             />
             <input
+              name="middleName"
+              value={formData.middleName || ""}
+              onChange={handleChange}
+              placeholder="Middle Name"
+              className="input"
+            />
+            <input
               name="lastName"
               value={formData.lastName || ""}
               onChange={handleChange}
               placeholder="Last Name"
               className="input"
             />
+            <input
+              name="bio"
+              value={formData.bio || ""}
+              onChange={handleChange}
+              placeholder="Bio"
+              className="input col-span-full"
+            />
           </div>
         </fieldset>
 
         {/* ☎ Contact Info */}
-        <fieldset className="border border-black/10 p-4 rounded-md">
+        <fieldset className="border border-black/20 p-4 rounded-md">
           <legend className="font-semibold text-lg text-black mb-2">
             Contact Info
           </legend>
@@ -121,7 +134,7 @@ const ProfileSection = ({ user, refreshUser }) => {
         </fieldset>
 
         {/* 🏠 Permanent Address */}
-        <fieldset className="border border-black/10 p-4 rounded-md">
+        <fieldset className="border border-black/20 p-4 rounded-md">
           <legend className="font-semibold text-lg text-black mb-2">
             Permanent Address
           </legend>
@@ -179,7 +192,7 @@ const ProfileSection = ({ user, refreshUser }) => {
         </fieldset>
 
         {/* 📦 Delivery Address */}
-        <fieldset className="border border-black/10 p-4 rounded-md">
+        <fieldset className="border border-black/20 p-4 rounded-md">
           <legend className="font-semibold text-lg text-black mb-2">
             Delivery Address
           </legend>
@@ -189,6 +202,13 @@ const ProfileSection = ({ user, refreshUser }) => {
               value={formData.deliveryFirstName || ""}
               onChange={handleChange}
               placeholder="First Name"
+              className="input"
+            />
+            <input
+              name="deliveryMiddleName"
+              value={formData.deliveryMiddleName || ""}
+              onChange={handleChange}
+              placeholder="Middle Name"
               className="input"
             />
             <input
@@ -257,8 +277,31 @@ const ProfileSection = ({ user, refreshUser }) => {
           </div>
         </fieldset>
 
-        {/* 💾 Save Button */}
-        <div className="flex items-center gap-4 pt-2">
+        {/* 📷 Additional Info */}
+        <fieldset className="border border-black/20 p-4 rounded-md">
+          <legend className="font-semibold text-lg text-black mb-2">
+            Additional Info
+          </legend>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              name="profileImage"
+              value={formData.profileImage || ""}
+              onChange={handleChange}
+              placeholder="Profile Image URL"
+              className="input"
+            />
+            <input
+              name="level"
+              value={formData.level || ""}
+              onChange={handleChange}
+              placeholder="User Level"
+              className="input"
+            />
+          </div>
+        </fieldset>
+
+        {/* 💾 Submit Button */}
+        <div className="flex items-center gap-4">
           <button
             type="submit"
             disabled={loading}
