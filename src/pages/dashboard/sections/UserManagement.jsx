@@ -12,7 +12,8 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await secureAxios.get("/users");
+      const res = await secureAxios.get("/admin/users");
+
       setUsers(res.data);
     } catch (err) {
       setError(
@@ -41,7 +42,11 @@ const UserManagement = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await secureAxios.put(`/users/${selectedUser._id}`, editForm);
+      const res = await secureAxios.put(
+        `/admin/users/${selectedUser._id}`,
+        editForm
+      );
+
       setUsers((prev) =>
         prev.map((u) => (u._id === selectedUser._id ? res.data.user : u))
       );
