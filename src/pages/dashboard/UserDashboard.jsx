@@ -25,14 +25,27 @@ const UserDashboard = () => {
     if (!userData) return <p>Loading profile...</p>;
 
     switch (activeTab) {
+      // 👤 Regular user sections
       case "profile":
         return <ProfileSection user={userData} refreshUser={fetchUser} />;
       case "orders":
-        return <p>🧾 Orders coming soon...</p>;
+        return (
+          <p className="text-sm text-gray-600">🧾 Orders coming soon...</p>
+        );
       case "wishlist":
-        return <p>💖 Wishlist coming soon...</p>;
+        return (
+          <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
+        );
+      // 🛠️ Moderator-only
+      case "panel":
+        return <p className="text-sm text-gray-600">📋 Panel coming soon...</p>;
+      case "complaints":
+        return (
+          <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
+        );
+      // ❓ Fallback
       default:
-        return <p>🔧 Unknown section</p>;
+        return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }
   };
 
