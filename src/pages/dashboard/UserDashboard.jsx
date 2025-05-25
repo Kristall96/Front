@@ -1,31 +1,61 @@
+// src/pages/dashboard/UserDashboard.jsx
 import { useEffect, useState } from "react";
 import secureAxios from "../../utils/secureAxios";
-import DashboardLayout from "../dashboard/DashboardLayout";
-import Navbar from "../../components/Navbar";
+import DashboardLayout from "./DashboardLayout";
+import ProfileSection from "./sections/ProfileSection";
+
 const UserDashboard = () => {
-  const [data, setData] = useState(null);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [userData, setUserData] = useState(null);
+
+  const fetchUser = async () => {
+    try {
+      const res = await secureAxios.get("/users/me");
+      setUserData(res.data);
+    } catch (err) {
+      console.error("Failed to load profile:", err.response?.data?.message);
+    }
+  };
 
   useEffect(() => {
-    secureAxios.get("/dashboard/user").then((res) => setData(res.data));
+    fetchUser();
   }, []);
 
+  const renderSection = () => {
+    if (activeTab === "profile") {
+      return <ProfileSection user={userData} refreshUser={fetchUser} />;
+    }
+    return <p className="text-sm text-gray-500">Coming soon...</p>;
+  };
+
   return (
-    <>
-      <Navbar />
-      <DashboardLayout>
-        <h1 className="text-2xl font-bold mb-4">User Dashboard</h1>
-        {data ? (
-          <div className="bg-white p-4 rounded shadow">
-            <p>{data.message}</p>
-            <pre className="mt-4 text-sm bg-gray-100 p-4 rounded">
-              {JSON.stringify(data.recentOrders, null, 2)}
-            </pre>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </DashboardLayout>
-    </>
+    <DashboardLayout>
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white border-r p-4">
+          <h2 className="text-lg font-semibold mb-6">Dashboard</h2>
+          <ul className="space-y-2">
+            <li>
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`block w-full text-left hover:text-blue-500 ${
+                  activeTab === "profile" ? "font-bold text-blue-600" : ""
+                }`}
+              >
+                My Profile
+              </button>
+            </li>
+            {/* You can add more tabs here */}
+          </ul>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 bg-gray-50">
+          <h1 className="text-2xl font-bold mb-6">User Dashboard</h1>
+          {userData ? renderSection() : <p>Loading profile...</p>}
+        </main>
+      </div>
+    </DashboardLayout>
   );
 };
 
