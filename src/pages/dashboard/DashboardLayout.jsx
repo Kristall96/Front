@@ -9,6 +9,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       { key: "orders", label: "My Orders" },
       { key: "wishlist", label: "Wishlist" },
       { key: "overview", label: "Overview" },
+      { key: "products", label: "Products" },
       { key: "users", label: "Manage Users" },
       { key: "orders", label: "Orders" },
     ],

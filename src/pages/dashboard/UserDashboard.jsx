@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import Navbar from "../../components/Navbar";
 
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState("profile");
   const [userData, setUserData] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get("tab") || "profile";
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   const fetchUser = async () => {
     try {
@@ -25,7 +32,6 @@ const UserDashboard = () => {
     if (!userData) return <p>Loading profile...</p>;
 
     switch (activeTab) {
-      // 👤 Regular user sections
       case "profile":
         return <ProfileSection user={userData} refreshUser={fetchUser} />;
       case "orders":
@@ -36,8 +42,6 @@ const UserDashboard = () => {
         return (
           <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
         );
-
-      // ❓ Fallback
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }

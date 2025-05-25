@@ -1,13 +1,19 @@
-// src/pages/dashboard/ModeratorDashboard.jsx
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import Navbar from "../../components/Navbar";
 
 const ModeratorDashboard = () => {
-  const [activeTab, setActiveTab] = useState("profile");
   const [userData, setUserData] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get("tab") || "profile";
+
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
 
   const fetchUser = async () => {
     try {
@@ -26,7 +32,6 @@ const ModeratorDashboard = () => {
     if (!userData) return <p>Loading profile...</p>;
 
     switch (activeTab) {
-      // 👤 User-like features
       case "profile":
         return <ProfileSection user={userData} refreshUser={fetchUser} />;
       case "orders":
@@ -37,16 +42,12 @@ const ModeratorDashboard = () => {
         return (
           <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
         );
-
-      // 🛠️ Moderator-only
       case "panel":
         return <p className="text-sm text-gray-600">📋 Panel coming soon...</p>;
       case "complaints":
         return (
           <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
         );
-
-      // ❓ Fallback
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }

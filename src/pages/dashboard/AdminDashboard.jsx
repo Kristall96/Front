@@ -4,6 +4,7 @@ import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import UserManagement from "./sections/UserManagement";
+import ProductManagement from "./sections/ProductManagement"; // ✅ NEW
 import Navbar from "../../components/Navbar";
 
 const AdminDashboard = () => {
@@ -11,7 +12,6 @@ const AdminDashboard = () => {
   const [adminStats, setAdminStats] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Get current tab from URL (default to 'profile')
   const activeTab = searchParams.get("tab") || "profile";
 
   const setActiveTab = (tab) => {
@@ -57,6 +57,8 @@ const AdminDashboard = () => {
         );
       case "users":
         return <UserManagement />;
+      case "products":
+        return <ProductManagement />; // ✅ NEW
       case "overview":
         return adminStats ? (
           <div className="bg-white p-4 rounded shadow">
