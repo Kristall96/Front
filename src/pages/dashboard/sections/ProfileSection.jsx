@@ -62,11 +62,11 @@ const ProfileSection = ({ user, refreshUser }) => {
               Edit Your Profile
             </h2>
             <p className="text-sm text-gray-600 font-medium">
-              Level {formData.level || 1}
+              Level: {formData.level || 1}
             </p>
             {formData.badge && (
               <span className="inline-block mt-1 px-3 py-1 text-xs bg-black text-white rounded-full shadow-sm">
-                {formData.badge}
+                badge: {formData.badge}
               </span>
             )}
           </div>
