@@ -1,3 +1,4 @@
+// src/pages/dashboard/ModeratorDashboard.jsx
 import { useEffect, useState } from "react";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
@@ -5,7 +6,7 @@ import ProfileSection from "./sections/ProfileSection";
 import Navbar from "../../components/Navbar";
 
 const ModeratorDashboard = () => {
-  const [activeTab, setActiveTab] = useState("panel");
+  const [activeTab, setActiveTab] = useState("profile");
   const [userData, setUserData] = useState(null);
 
   const fetchUser = async () => {
@@ -13,10 +14,7 @@ const ModeratorDashboard = () => {
       const res = await secureAxios.get("/users/me");
       setUserData(res.data);
     } catch (err) {
-      console.error(
-        "Failed to load moderator profile:",
-        err.response?.data?.message
-      );
+      console.error("Failed to load profile:", err.response?.data?.message);
     }
   };
 
@@ -28,12 +26,27 @@ const ModeratorDashboard = () => {
     if (!userData) return <p>Loading profile...</p>;
 
     switch (activeTab) {
-      case "panel":
+      // 👤 User-like features
+      case "profile":
         return <ProfileSection user={userData} refreshUser={fetchUser} />;
+      case "orders":
+        return (
+          <p className="text-sm text-gray-600">🧾 Orders coming soon...</p>
+        );
+      case "wishlist":
+        return (
+          <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
+        );
+
+      // 🛠️ Moderator-only
+      case "panel":
+        return <p className="text-sm text-gray-600">📋 Panel coming soon...</p>;
       case "complaints":
         return (
           <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
         );
+
+      // ❓ Fallback
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }

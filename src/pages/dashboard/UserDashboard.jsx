@@ -36,13 +36,7 @@ const UserDashboard = () => {
         return (
           <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
         );
-      // 🛠️ Moderator-only
-      case "panel":
-        return <p className="text-sm text-gray-600">📋 Panel coming soon...</p>;
-      case "complaints":
-        return (
-          <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
-        );
+
       // ❓ Fallback
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
