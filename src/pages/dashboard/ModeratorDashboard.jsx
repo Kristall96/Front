@@ -1,28 +1,56 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../utils/secureAxios";
-import DashboardLayout from "../dashboard/DashboardLayout";
+import DashboardLayout from "./DashboardLayout";
+import ProfileSection from "./sections/ProfileSection";
+import Navbar from "../../components/Navbar";
 
 const ModeratorDashboard = () => {
-  const [data, setData] = useState(null);
+  const [activeTab, setActiveTab] = useState("panel");
+  const [userData, setUserData] = useState(null);
+
+  const fetchUser = async () => {
+    try {
+      const res = await secureAxios.get("/users/me");
+      setUserData(res.data);
+    } catch (err) {
+      console.error(
+        "Failed to load moderator profile:",
+        err.response?.data?.message
+      );
+    }
+  };
 
   useEffect(() => {
-    secureAxios.get("/dashboard/moderator").then((res) => setData(res.data));
+    fetchUser();
   }, []);
 
+  const renderSection = () => {
+    if (!userData) return <p>Loading profile...</p>;
+
+    switch (activeTab) {
+      case "panel":
+        return <ProfileSection user={userData} refreshUser={fetchUser} />;
+      case "complaints":
+        return (
+          <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
+        );
+      default:
+        return <p className="text-sm text-red-500">⚠ Unknown section</p>;
+    }
+  };
+
   return (
-    <DashboardLayout>
-      <h1 className="text-2xl font-bold mb-4">Moderator Dashboard</h1>
-      {data ? (
-        <div className="bg-white p-4 rounded shadow">
-          <p>{data.message}</p>
-          <pre className="mt-4 text-sm bg-gray-100 p-4 rounded">
-            {JSON.stringify(data.tasks, null, 2)}
-          </pre>
+    <>
+      <Navbar />
+      <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+        <div>
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">
+            Moderator Dashboard
+          </h1>
+          {renderSection()}
         </div>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </DashboardLayout>
+      </DashboardLayout>
+    </>
   );
 };
 
