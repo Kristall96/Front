@@ -1,43 +1,48 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const { user } = useAuth();
 
   const links = {
     admin: [
-      { to: "/dashboard/admin", label: "Overview" },
-      { to: "/dashboard/admin/users", label: "Manage Users" },
-      { to: "/dashboard/admin/orders", label: "Orders" },
+      { key: "overview", label: "Overview" },
+      { key: "users", label: "Manage Users" },
+      { key: "orders", label: "Orders" },
     ],
     moderator: [
-      { to: "/dashboard/moderator", label: "Moderation Panel" },
-      { to: "/dashboard/moderator/complaints", label: "Complaints" },
+      { key: "panel", label: "Moderation Panel" },
+      { key: "complaints", label: "Complaints" },
     ],
     user: [
-      { to: "/dashboard/user", label: "My Profile" },
-      { to: "/dashboard/user/orders", label: "My Orders" },
-      { to: "/dashboard/user/wishlist", label: "Wishlist" },
+      { key: "profile", label: "My Profile" },
+      { key: "orders", label: "My Orders" },
+      { key: "wishlist", label: "Wishlist" },
     ],
   };
+
+  const roleLinks = links[user?.role] || [];
 
   return (
     <div className="flex min-h-screen bg-gray-100 text-gray-800">
       <aside className="w-64 bg-white shadow-md p-4">
         <h2 className="text-xl font-bold mb-6">Dashboard</h2>
         <nav className="flex flex-col space-y-3">
-          {(links[user.role] || []).map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="hover:text-blue-600 font-medium"
+          {roleLinks.map((link) => (
+            <button
+              key={link.key}
+              onClick={() => setActiveTab(link.key)}
+              className={`text-left font-medium hover:text-blue-600 ${
+                activeTab === link.key ? "text-blue-600 font-semibold" : ""
+              }`}
             >
               {link.label}
-            </Link>
+            </button>
           ))}
         </nav>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+
+      <main className="flex-1 p-8">{children}</main>
     </div>
   );
 };
