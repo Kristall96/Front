@@ -13,10 +13,7 @@ const ProductManagement = () => {
       const res = await secureAxios.get("/products");
       setProducts(res.data);
     } catch (err) {
-      setError(
-        "❌ Failed to fetch products",
-        err.response?.data?.message || "Unknown error"
-      );
+      setError(err.response?.data?.message || "❌ Failed to fetch products");
     } finally {
       setLoading(false);
     }
@@ -28,7 +25,7 @@ const ProductManagement = () => {
     setSyncing(true);
     try {
       await secureAxios.post("/admin/products/sync");
-      await fetchProducts(); // Refresh after sync
+      await fetchProducts();
       alert("✅ Synced Printful products successfully");
     } catch (err) {
       alert("❌ Sync failed: " + (err.response?.data?.message || err.message));
@@ -43,6 +40,7 @@ const ProductManagement = () => {
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-black">Product Management</h2>
         <div className="flex gap-4">
@@ -66,46 +64,65 @@ const ProductManagement = () => {
         </div>
       </div>
 
+      {/* Table or error/loading */}
       {loading ? (
         <p>Loading products...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <table className="w-full table-auto border border-gray-300 bg-white">
-          <thead className="bg-gray-100 text-left">
-            <tr>
-              <th className="px-4 py-2">Title</th>
-              <th className="px-4 py-2">Price</th>
-              <th className="px-4 py-2">Type</th>
-              <th className="px-4 py-2">Variants</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p._id} className="border-t text-sm">
-                <td className="px-4 py-2">{p.title}</td>
-                <td className="px-4 py-2">${p.price.toFixed(2)}</td>
-                <td className="px-4 py-2">{p.source || "manual"}</td>
-                <td className="px-4 py-2">{p.variants?.length || 0}</td>
-                <td className="px-4 py-2">
-                  <button
-                    className="text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 mr-2"
-                    disabled
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    disabled={p.source === "printful"}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow">
+          <table className="w-full text-sm table-auto">
+            <thead className="bg-gray-100 text-left text-gray-700 uppercase">
+              <tr>
+                <th className="px-4 py-3">Preview</th>
+                <th className="px-4 py-3">Title</th>
+                <th className="px-4 py-3 text-center">Price</th>
+                <th className="px-4 py-3 text-center">Type</th>
+                <th className="px-4 py-3 text-center">Variants</th>
+                <th className="px-4 py-3 text-center">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p._id} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-2">
+                    <img
+                      src={p.imageUrl || "/placeholder.jpg"}
+                      alt={p.title}
+                      className="w-16 h-16 object-contain border rounded"
+                    />
+                  </td>
+                  <td className="px-4 py-2 font-medium text-gray-900">
+                    {p.title}
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    ${p.price?.toFixed(2) || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-center capitalize">
+                    {p.source || "manual"}
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    {p.variants?.length || 0}
+                  </td>
+                  <td className="px-4 py-2 text-center space-x-2">
+                    <button
+                      className="text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      disabled
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      disabled={p.source === "printful"}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
