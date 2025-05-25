@@ -30,28 +30,45 @@ const UserDashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-gray-100">
         {/* Sidebar */}
-        <aside className="w-64 bg-white border-r p-4">
+        <aside className="w-64 bg-white border-r p-6">
           <h2 className="text-lg font-semibold mb-6">Dashboard</h2>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             <li>
               <button
                 onClick={() => setActiveTab("profile")}
                 className={`block w-full text-left hover:text-blue-500 ${
-                  activeTab === "profile" ? "font-bold text-blue-600" : ""
+                  activeTab === "profile" ? "font-semibold text-blue-600" : ""
                 }`}
               >
                 My Profile
               </button>
             </li>
-            {/* You can add more tabs here */}
+            <li>
+              <button
+                onClick={() => setActiveTab("orders")}
+                className="block w-full text-left hover:text-blue-500"
+              >
+                My Orders
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveTab("wishlist")}
+                className="block w-full text-left hover:text-blue-500"
+              >
+                Wishlist
+              </button>
+            </li>
           </ul>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-50">
-          <h1 className="text-2xl font-bold mb-6">User Dashboard</h1>
+        <main className="flex-1 p-10">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">
+            User Dashboard
+          </h1>
           {userData ? renderSection() : <p>Loading profile...</p>}
         </main>
       </div>

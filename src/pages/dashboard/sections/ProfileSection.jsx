@@ -27,34 +27,42 @@ const ProfileSection = ({ user, refreshUser }) => {
   };
 
   return (
-    <div className="max-w-lg bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Edit Your Profile</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-xl bg-white p-8 rounded-2xl shadow-lg border">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+        Edit Your Profile
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium">Username</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Username
+          </label>
           <input
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="mt-1 w-full p-2 border rounded"
+            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">Email</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
           <input
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="mt-1 w-full p-2 border rounded"
+            className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
         <button
           type="submit"
-          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+          className="px-5 py-2 bg-black text-white rounded-md hover:bg-gray-900 transition"
         >
           Save Changes
         </button>
-        {message && <p className="text-sm mt-2">{message}</p>}
+        {message && (
+          <p className="text-sm mt-2 text-green-600 font-medium">{message}</p>
+        )}
       </form>
     </div>
   );
