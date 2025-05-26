@@ -7,7 +7,8 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     slug: "",
     description: "",
     price: "",
-    imageUrl: "",
+    images: [],
+    thumbnail: "",
     variants: [],
   });
 
@@ -18,6 +19,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     preview: "",
   });
 
+  const [imageUrl, setImageUrl] = useState(""); // temporary input
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,6 +37,16 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     setVariant({ size: "", color: "", retail_price: "", preview: "" });
   };
 
+  const addImage = () => {
+    if (!imageUrl) return;
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, imageUrl],
+      thumbnail: prev.images.length === 0 ? imageUrl : prev.thumbnail, // first becomes thumbnail
+    }));
+    setImageUrl("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -48,6 +60,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
           ...v,
           retail_price: parseFloat(v.retail_price),
         })),
+        imageUrl: form.thumbnail,
         source: "manual",
       };
 
@@ -62,7 +75,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/10">
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center">
       <div className="bg-white p-6 w-full max-w-2xl rounded-lg shadow space-y-4 relative">
         <button
           onClick={onClose}
@@ -89,13 +102,6 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             }
           />
 
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Image URL"
-            value={form.imageUrl}
-            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-          />
-
           <textarea
             className="w-full border p-2 rounded"
             placeholder="Description"
@@ -111,7 +117,48 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
 
-          {/* Variant Section */}
+          {/* Cloudinary Images */}
+          <div className="bg-gray-50 p-3 rounded space-y-2">
+            <h4 className="font-medium">Product Images (Cloudinary URLs)</h4>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 border p-2 rounded"
+                placeholder="Image URL"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={addImage}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+
+            {form.images.length > 0 && (
+              <ul className="space-y-1">
+                {form.images.map((img, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="thumbnail"
+                      checked={form.thumbnail === img}
+                      onChange={() => setForm({ ...form, thumbnail: img })}
+                    />
+                    <img
+                      src={img}
+                      alt={`preview-${i}`}
+                      className="w-12 h-12 rounded border object-cover"
+                    />
+                    <span className="text-sm truncate">{img}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Variants */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <h4 className="font-medium">Add Variant</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
