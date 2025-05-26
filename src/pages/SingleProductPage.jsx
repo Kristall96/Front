@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../utils/secureAxios";
 import Navbar from "../components/Navbar";
+
 const SingleProductPage = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
@@ -13,8 +14,14 @@ const SingleProductPage = () => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(`/products/slug/${slug}`);
-        setProduct(res.data);
-        setSelectedVariant(res.data.variants?.[0] || null); // default selection
+        const productData = res.data;
+
+        // Check for valid variantId
+        const validVariants =
+          productData.variants?.filter((v) => v?.variantId) || [];
+
+        setProduct(productData);
+        setSelectedVariant(validVariants[0] || null);
       } catch (err) {
         setError(err.response?.data?.message || "Product not found");
       } finally {
@@ -25,15 +32,17 @@ const SingleProductPage = () => {
     fetchProduct();
   }, [slug]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="p-10 text-center text-gray-500 text-lg">Loading...</div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div className="p-10 text-center text-red-600 font-semibold">{error}</div>
     );
+  }
 
   if (!product) return null;
 
@@ -70,7 +79,6 @@ const SingleProductPage = () => {
               </p>
 
               {/* Variant Dropdown */}
-              {/* Variant Dropdown */}
               {product.variants?.length > 0 && (
                 <div className="mt-6">
                   <label
@@ -90,11 +98,14 @@ const SingleProductPage = () => {
                       setSelectedVariant(selected);
                     }}
                   >
-                    {product.variants.map((v) => (
-                      <option key={v.variantId} value={v.variantId}>
-                        {v.size} • {v.color} • ${v.retail_price}
-                      </option>
-                    ))}
+                    {product.variants
+                      .filter((v) => v.variantId && v.size && v.color)
+                      .map((v) => (
+                        <option key={v.variantId} value={v.variantId}>
+                          {v.size} • {v.color} • $
+                          {v.retail_price?.toFixed(2) || "0.00"}
+                        </option>
+                      ))}
                   </select>
                 </div>
               )}
