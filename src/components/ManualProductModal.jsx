@@ -62,7 +62,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/10">
       <div className="bg-white p-6 w-full max-w-2xl rounded-lg shadow space-y-4 relative">
         <button
           onClick={onClose}
