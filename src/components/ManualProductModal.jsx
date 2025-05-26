@@ -25,34 +25,47 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
 
   if (!isOpen) return null;
 
-  const handleImageUpload = async (e) => {
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await secureAxios.post("/upload/cloudinary", formData);
+    return res.data.secure_url;
+  };
+
+  const handleProductImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await secureAxios.post("/upload/cloudinary", formData);
-      const url = res.data.secure_url;
-
+      const url = await uploadToCloudinary(file);
       setForm((prev) => ({
         ...prev,
         images: [...prev.images, url],
         thumbnail: prev.images.length === 0 ? url : prev.thumbnail,
       }));
-    } catch (err) {
-      console.error("Image upload failed", err);
-      setError("❌ Image upload failed. Please try again.");
+    } catch {
+      setError("Failed to upload product image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVariantImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file);
+      setVariant((prev) => ({ ...prev, preview: url }));
+    } catch {
+      setError("Failed to upload variant preview.");
     } finally {
       setUploading(false);
     }
   };
 
   const addVariant = () => {
-    const { size, color, retail_price } = variant;
-    if (!size || !color || !retail_price) return;
-
+    if (!variant.size || !variant.color || !variant.retail_price) return;
     setForm((prev) => ({
       ...prev,
       variants: [
@@ -60,7 +73,6 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         { ...variant, variantId: crypto.randomUUID() },
       ],
     }));
-
     setVariant({ size: "", color: "", retail_price: "", preview: "" });
   };
 
@@ -73,19 +85,19 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       const payload = {
         ...form,
         price: parseFloat(form.price),
-        imageUrl: form.thumbnail,
-        source: "manual",
         variants: form.variants.map((v) => ({
           ...v,
           retail_price: parseFloat(v.retail_price),
         })),
+        imageUrl: form.thumbnail,
+        source: "manual",
       };
 
       await secureAxios.post("/products", payload);
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "❌ Failed to create product.");
+      setError(err.response?.data?.message || "Failed to create product.");
     } finally {
       setLoading(false);
     }
@@ -105,7 +117,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         {error && <p className="text-red-500">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title & Info */}
+          {/* Basic Info */}
           <input
             className="w-full border p-2 rounded"
             placeholder="Title"
@@ -132,18 +144,17 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
 
-          {/* Image Upload */}
+          {/* Product Images */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
-            <label className="font-medium">Product Images (Cloudinary)</label>
+            <label className="font-medium">Product Images</label>
             <input
               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={handleProductImageUpload}
               disabled={uploading}
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              className="file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded hover:file:bg-blue-700 w-full text-sm"
             />
             {uploading && <p className="text-sm text-blue-600">Uploading...</p>}
-
             {form.images.length > 0 && (
               <ul className="space-y-1">
                 {form.images.map((img, i) => (
@@ -159,14 +170,14 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
                       alt={`preview-${i}`}
                       className="w-12 h-12 rounded border object-cover"
                     />
-                    <span className="text-sm truncate">{img}</span>
+                    <span className="text-xs truncate">{img}</span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* Variant Builder */}
+          {/* Variants */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <h4 className="font-medium">Add Variant</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -195,33 +206,34 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
                   setVariant({ ...variant, retail_price: e.target.value })
                 }
               />
-              <input
-                className="border p-2 rounded"
-                placeholder="Preview Image URL"
-                value={variant.preview}
-                onChange={(e) =>
-                  setVariant({ ...variant, preview: e.target.value })
-                }
-              />
+              <div>
+                <label className="text-sm">Preview:</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleVariantImageUpload}
+                  className="block mt-1"
+                />
+              </div>
             </div>
+            {variant.preview && (
+              <div className="flex gap-2 items-center mt-1">
+                <img
+                  src={variant.preview}
+                  alt="preview"
+                  className="w-12 h-12 rounded border"
+                />
+                <span className="text-xs text-gray-700">{variant.preview}</span>
+              </div>
+            )}
             <button
               type="button"
               onClick={addVariant}
-              className="px-3 py-1 mt-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+              className="px-3 py-1 mt-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
             >
               Add Variant
             </button>
           </div>
-
-          {form.variants.length > 0 && (
-            <ul className="list-disc list-inside text-sm text-gray-700">
-              {form.variants.map((v, i) => (
-                <li key={i}>
-                  {v.size} • {v.color} • ${v.retail_price}
-                </li>
-              ))}
-            </ul>
-          )}
 
           {/* Submit */}
           <button
