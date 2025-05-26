@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../utils/secureAxios";
-import { Link } from "react-router-dom";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -39,6 +41,17 @@ const ProductManagement = () => {
     fetchProducts();
   }, []);
 
+  const filtered = products.filter((p) =>
+    p.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const paginated = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -65,55 +78,108 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      {/* Product Grid */}
+      {/* Search bar */}
+      <div className="flex justify-between items-center mb-2">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="px-3 py-2 border border-gray-300 rounded w-full max-w-sm"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="ml-2 text-sm text-blue-600 hover:underline"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      {/* Table */}
       {loading ? (
         <p>Loading products...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((p) => (
-            <div
-              key={p._id}
-              className="border rounded-xl shadow-sm hover:shadow-md bg-white transition"
-            >
-              <img
-                src={p.imageUrl || "/placeholder.jpg"}
-                alt={p.title}
-                className="w-full h-48 object-contain bg-gray-50 rounded-t-xl"
-                loading="lazy"
-              />
-              <div className="p-4 space-y-1">
-                <h3 className="text-md font-semibold text-gray-800">
-                  {p.title}
-                </h3>
-                <p className="text-sm text-gray-600">${p.price?.toFixed(2)}</p>
-                <p className="text-xs text-gray-400">
-                  {p.variants?.length || 0} variants
-                </p>
-                <div className="flex items-center justify-between pt-3">
-                  <span className="text-xs text-gray-500 capitalize">
-                    {p.source || "manual"}
-                  </span>
-                  <div className="space-x-2">
-                    <button
-                      className="text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                      disabled
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                      disabled={p.source === "printful"}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
+        <>
+          <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow">
+            <table className="w-full text-sm table-auto">
+              <thead className="bg-gray-100 text-left text-gray-700 uppercase">
+                <tr>
+                  <th className="px-4 py-3">Preview</th>
+                  <th className="px-4 py-3">Title</th>
+                  <th className="px-4 py-3 text-center">Price</th>
+                  <th className="px-4 py-3 text-center">Type</th>
+                  <th className="px-4 py-3 text-center">Variants</th>
+                  <th className="px-4 py-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((p) => (
+                  <tr key={p._id} className="border-t hover:bg-gray-50">
+                    <td className="px-4 py-2">
+                      <img
+                        src={p.imageUrl || "/placeholder.jpg"}
+                        alt={p.title}
+                        className="w-16 h-16 object-contain border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-2 font-medium text-gray-900">
+                      {p.title}
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      ${p.price?.toFixed(2) || "N/A"}
+                    </td>
+                    <td className="px-4 py-2 text-center capitalize">
+                      {p.source || "manual"}
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      {p.variants?.length || 0}
+                    </td>
+                    <td className="px-4 py-2 text-center space-x-2">
+                      <button
+                        className="text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                        disabled
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                        disabled={p.source === "printful"}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6 space-x-2">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded border text-sm ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );
