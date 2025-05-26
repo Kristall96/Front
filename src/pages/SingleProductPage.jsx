@@ -7,6 +7,7 @@ const SingleProductPage = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -16,12 +17,16 @@ const SingleProductPage = () => {
         const res = await axios.get(`/products/slug/${slug}`);
         const productData = res.data;
 
-        // Check for valid variantId
         const validVariants =
           productData.variants?.filter((v) => v?.variantId) || [];
 
         setProduct(productData);
         setSelectedVariant(validVariants[0] || null);
+
+        // Prefer thumbnail or first image
+        const initialImage =
+          productData.thumbnail || productData.images?.[0] || "";
+        setSelectedImage(initialImage);
       } catch (err) {
         setError(err.response?.data?.message || "Product not found");
       } finally {
@@ -46,27 +51,50 @@ const SingleProductPage = () => {
 
   if (!product) return null;
 
+  const handleVariantChange = (variantId) => {
+    const selected = product.variants.find((v) => v.variantId === variantId);
+    setSelectedVariant(selected);
+    if (selected?.preview) {
+      setSelectedImage(selected.preview);
+    }
+  };
+
   return (
     <>
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        {/* Product Header */}
+      <div className="max-w-5xl mx-auto px-4 py-10">
         <div className="flex flex-col md:flex-row gap-10">
           {/* Image Section */}
-          <div className="flex-shrink-0 w-full md:w-1/2">
-            <img
-              src={
-                selectedVariant?.preview ||
-                product.imageUrl ||
-                "/placeholder.jpg"
-              }
-              alt={product.title}
-              className="w-full h-auto max-h-[400px] object-contain rounded-xl border bg-white shadow"
-            />
+          <div className="w-full md:w-1/2">
+            <div className="border rounded-lg bg-white p-2 shadow-sm">
+              <img
+                src={selectedImage || "/placeholder.jpg"}
+                alt={product.title}
+                className="w-full h-[400px] object-contain rounded"
+              />
+            </div>
+
+            {product.images?.length > 1 && (
+              <div className="flex gap-2 mt-4 overflow-x-auto">
+                {product.images.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    onClick={() => setSelectedImage(img)}
+                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
+                      img === selectedImage
+                        ? "border-blue-500"
+                        : "border-transparent"
+                    }`}
+                    alt={`thumbnail-${index}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Details Section */}
-          <div className="flex flex-col justify-between space-y-4 w-full md:w-1/2">
+          <div className="w-full md:w-1/2 flex flex-col justify-between space-y-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {product.title}
@@ -78,7 +106,6 @@ const SingleProductPage = () => {
                 {product.description}
               </p>
 
-              {/* Variant Dropdown */}
               {product.variants?.length > 0 && (
                 <div className="mt-6">
                   <label
@@ -91,19 +118,13 @@ const SingleProductPage = () => {
                     id="variant-select"
                     className="w-full border rounded-md p-2 text-sm focus:ring focus:ring-blue-200"
                     value={selectedVariant?.variantId || ""}
-                    onChange={(e) => {
-                      const selected = product.variants.find(
-                        (v) => v.variantId === e.target.value
-                      );
-                      setSelectedVariant(selected);
-                    }}
+                    onChange={(e) => handleVariantChange(e.target.value)}
                   >
                     {product.variants
                       .filter((v) => v.variantId && v.size && v.color)
                       .map((v) => (
                         <option key={v.variantId} value={v.variantId}>
-                          {v.size} • {v.color} • $
-                          {v.retail_price?.toFixed(2) || "0.00"}
+                          {v.size} • {v.color} • ${v.retail_price?.toFixed(2)}
                         </option>
                       ))}
                   </select>
