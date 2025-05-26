@@ -6,7 +6,7 @@ import { useAuth } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
-
+import SingleProductPage from "./pages/SingleProductPage";
 // Dashboard Pages
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import ModeratorDashboard from "./pages/dashboard/ModeratorDashboard";
@@ -31,7 +31,7 @@ function App() {
         <Route path="/reset-password/confirm" element={<ResetPasswordPage />} />
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-
+        <Route path="/product/:slug" element={<SingleProductPage />} />
         {/* Role-Protected Dashboard Routes */}
         <Route
           path="/dashboard/admin"
