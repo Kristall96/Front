@@ -54,17 +54,15 @@ const ProductManagement = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header + Actions */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h2 className="text-3xl font-bold text-black">Product Management</h2>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <button
             onClick={handleSyncPrintful}
             disabled={syncing}
             className={`px-4 py-2 rounded text-white font-medium ${
-              syncing
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+              syncing ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {syncing ? "Syncing..." : "Sync from Printful"}
@@ -73,13 +71,13 @@ const ProductManagement = () => {
             disabled
             className="px-4 py-2 rounded text-white bg-gray-500 cursor-not-allowed"
           >
-            Upload Manual Product (coming soon)
+            Upload Manual Product (soon)
           </button>
         </div>
       </div>
 
-      {/* Search bar */}
-      <div className="flex justify-between items-center mb-2">
+      {/* Search */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <input
           type="text"
           placeholder="Search products..."
@@ -88,12 +86,12 @@ const ProductManagement = () => {
             setSearchQuery(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2 border border-gray-300 rounded w-full max-w-sm"
+          className="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="ml-2 text-sm text-blue-600 hover:underline"
+            className="text-sm text-blue-600 hover:underline"
           >
             Reset
           </button>
