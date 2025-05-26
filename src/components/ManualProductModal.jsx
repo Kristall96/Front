@@ -16,7 +16,8 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     size: "",
     color: "",
     retail_price: "",
-    preview: "",
+    previewFile: null,
+    previewUrl: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,62 +26,73 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
 
   if (!isOpen) return null;
 
-  const uploadToCloudinary = async (file) => {
+  const handleProductImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await secureAxios.post("/upload/cloudinary", formData);
+      const url = res.data.secure_url;
+      setForm((prev) => ({
+        ...prev,
+        images: [...prev.images, url],
+        thumbnail: prev.images.length === 0 ? url : prev.thumbnail,
+      }));
+    } catch (err) {
+      console.error("Image upload failed", err);
+      setError("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVariantImageUpload = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
     const res = await secureAxios.post("/upload/cloudinary", formData);
     return res.data.secure_url;
   };
 
-  const handleProductImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const addVariant = async () => {
+    if (!variant.size || !variant.color || !variant.retail_price) return;
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file);
+      let previewUrl = variant.previewUrl;
+      if (variant.previewFile) {
+        previewUrl = await handleVariantImageUpload(variant.previewFile);
+      }
       setForm((prev) => ({
         ...prev,
-        images: [...prev.images, url],
-        thumbnail: prev.images.length === 0 ? url : prev.thumbnail,
+        variants: [
+          ...prev.variants,
+          {
+            ...variant,
+            preview: previewUrl,
+            variantId: crypto.randomUUID(),
+          },
+        ],
+        images: [...prev.images, previewUrl],
       }));
-    } catch {
-      setError("Failed to upload product image.");
+      setVariant({
+        size: "",
+        color: "",
+        retail_price: "",
+        previewFile: null,
+        previewUrl: "",
+      });
+    } catch (err) {
+      setError("Failed to upload variant image", err);
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleVariantImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const url = await uploadToCloudinary(file);
-      setVariant((prev) => ({ ...prev, preview: url }));
-    } catch {
-      setError("Failed to upload variant preview.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const addVariant = () => {
-    if (!variant.size || !variant.color || !variant.retail_price) return;
-    setForm((prev) => ({
-      ...prev,
-      variants: [
-        ...prev.variants,
-        { ...variant, variantId: crypto.randomUUID() },
-      ],
-    }));
-    setVariant({ size: "", color: "", retail_price: "", preview: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     try {
       const payload = {
         ...form,
@@ -92,7 +104,6 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         imageUrl: form.thumbnail,
         source: "manual",
       };
-
       await secureAxios.post("/products", payload);
       onSuccess();
       onClose();
@@ -117,7 +128,6 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         {error && <p className="text-red-500">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Basic Info */}
           <input
             className="w-full border p-2 rounded"
             placeholder="Title"
@@ -144,15 +154,14 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
 
-          {/* Product Images */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <label className="font-medium">Product Images</label>
             <input
               type="file"
               accept="image/*"
               onChange={handleProductImageUpload}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
               disabled={uploading}
-              className="file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded hover:file:bg-blue-700 w-full text-sm"
             />
             {uploading && <p className="text-sm text-blue-600">Uploading...</p>}
             {form.images.length > 0 && (
@@ -170,17 +179,15 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
                       alt={`preview-${i}`}
                       className="w-12 h-12 rounded border object-cover"
                     />
-                    <span className="text-xs truncate">{img}</span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* Variants */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <h4 className="font-medium">Add Variant</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 items-center">
               <input
                 className="border p-2 rounded"
                 placeholder="Size"
@@ -206,36 +213,27 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
                   setVariant({ ...variant, retail_price: e.target.value })
                 }
               />
-              <div>
-                <label className="text-sm">Preview:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleVariantImageUpload}
-                  className="block mt-1"
-                />
-              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setVariant({ ...variant, previewFile: e.target.files[0] })
+                }
+              />
+              <span className="text-xs text-gray-500">
+                {variant.previewFile?.name || "No file chosen"}
+              </span>
             </div>
-            {variant.preview && (
-              <div className="flex gap-2 items-center mt-1">
-                <img
-                  src={variant.preview}
-                  alt="preview"
-                  className="w-12 h-12 rounded border"
-                />
-                <span className="text-xs text-gray-700">{variant.preview}</span>
-              </div>
-            )}
             <button
               type="button"
               onClick={addVariant}
-              className="px-3 py-1 mt-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+              className="px-3 py-1 mt-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+              disabled={uploading}
             >
               Add Variant
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
