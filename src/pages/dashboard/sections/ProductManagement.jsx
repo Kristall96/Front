@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import secureAxios from "../../../utils/secureAxios";
 import ProductCard from "../../../components/ProductCard";
+import ManualProductModal from "../../../components/ManualProductModal"; // Make sure this path is correct
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -11,6 +11,7 @@ const ProductManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showModal, setShowModal] = useState(false);
   const itemsPerPage = 8;
 
   const fetchProducts = async () => {
@@ -67,11 +68,12 @@ const ProductManagement = () => {
             {syncing ? "Syncing..." : "Sync from Printful"}
           </button>
 
-          <Link to="/dashboard/admin/products/create">
-            <button className="px-4 py-2 rounded text-white bg-gray-600 hover:bg-gray-700">
-              Upload Manual Product
-            </button>
-          </Link>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 rounded text-white bg-gray-600 hover:bg-gray-700"
+          >
+            Upload Manual Product
+          </button>
         </div>
       </div>
 
@@ -133,6 +135,15 @@ const ProductManagement = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <ManualProductModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onSuccess={fetchProducts}
+        />
       )}
     </div>
   );
