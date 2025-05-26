@@ -7,6 +7,8 @@ import HomePage from "./pages/HomePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import SingleProductPage from "./pages/SingleProductPage";
+import ManualProductForm from "./pages/dashboard/products/ManualProductForm";
+
 // Dashboard Pages
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import ModeratorDashboard from "./pages/dashboard/ModeratorDashboard";
@@ -32,6 +34,15 @@ function App() {
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/product/:slug" element={<SingleProductPage />} />
+        <Route
+          path="/dashboard/admin/products/create"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <ManualProductForm />
+            </RoleRoute>
+          }
+        />
+
         {/* Role-Protected Dashboard Routes */}
         <Route
           path="/dashboard/admin"

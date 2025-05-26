@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import secureAxios from "../../../utils/secureAxios";
 import ProductCard from "../../../components/ProductCard";
 
@@ -65,12 +66,12 @@ const ProductManagement = () => {
           >
             {syncing ? "Syncing..." : "Sync from Printful"}
           </button>
-          <button
-            disabled
-            className="px-4 py-2 rounded text-white bg-gray-500 cursor-not-allowed"
-          >
-            Upload Manual Product (soon)
-          </button>
+
+          <Link to="/dashboard/admin/products/create">
+            <button className="px-4 py-2 rounded text-white bg-gray-600 hover:bg-gray-700">
+              Upload Manual Product
+            </button>
+          </Link>
         </div>
       </div>
 
