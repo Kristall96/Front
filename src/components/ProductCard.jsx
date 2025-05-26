@@ -1,8 +1,8 @@
 // components/ProductCard.jsx
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ product }) => {
-  const { _id, title, price, imageUrl, variants, slug } = product;
+const ProductCard = ({ product, onDelete }) => {
+  const { _id, title, price, imageUrl, variants, slug, source } = product;
 
   return (
     <div className="rounded-xl overflow-hidden border bg-white shadow-sm hover:shadow-md transition duration-200">
@@ -31,11 +31,24 @@ const ProductCard = ({ product }) => {
           >
             View
           </Link>
+
           <button
+            className="flex-1 text-center bg-yellow-400 text-white px-3 py-1 text-sm rounded hover:bg-yellow-500 transition"
             disabled
-            className="flex-1 text-center bg-gray-300 text-gray-700 px-3 py-1 text-sm rounded cursor-not-allowed"
           >
-            + Cart
+            Edit
+          </button>
+
+          <button
+            onClick={() => onDelete && onDelete(_id)}
+            className={`flex-1 text-center text-white px-3 py-1 text-sm rounded transition ${
+              source === "printful"
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600"
+            }`}
+            disabled={source === "printful"}
+          >
+            Delete
           </button>
         </div>
       </div>

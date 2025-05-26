@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../utils/secureAxios";
+import ProductCard from "../../../components/ProductCard";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -95,66 +96,22 @@ const ProductManagement = () => {
         )}
       </div>
 
-      {/* Table */}
+      {/* Cards */}
       {loading ? (
         <p>Loading products...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
         <>
-          <div className="overflow-x-auto rounded border border-gray-200 bg-white shadow">
-            <table className="w-full text-sm table-auto">
-              <thead className="bg-gray-100 text-left text-gray-700 uppercase">
-                <tr>
-                  <th className="px-4 py-3">Preview</th>
-                  <th className="px-4 py-3">Title</th>
-                  <th className="px-4 py-3 text-center">Price</th>
-                  <th className="px-4 py-3 text-center">Type</th>
-                  <th className="px-4 py-3 text-center">Variants</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((p) => (
-                  <tr key={p._id} className="border-t hover:bg-gray-50">
-                    <td className="px-4 py-2">
-                      <img
-                        src={p.imageUrl || "/placeholder.jpg"}
-                        alt={p.title}
-                        className="w-16 h-16 object-contain border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-2 font-medium text-gray-900">
-                      {p.title}
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      ${p.price?.toFixed(2) || "N/A"}
-                    </td>
-                    <td className="px-4 py-2 text-center capitalize">
-                      {p.source || "manual"}
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      {p.variants?.length || 0}
-                    </td>
-                    <td className="px-4 py-2 text-center space-x-2">
-                      <button
-                        className="text-xs px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                        disabled
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                        disabled={p.source === "printful"}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {products.length === 0 ? (
+            <p>No products found.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
