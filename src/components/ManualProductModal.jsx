@@ -63,18 +63,25 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       if (variant.previewFile) {
         previewUrl = await handleVariantImageUpload(variant.previewFile);
       }
-      setForm((prev) => ({
-        ...prev,
-        variants: [
-          ...prev.variants,
-          {
-            ...variant,
-            preview: previewUrl,
-            variantId: crypto.randomUUID(),
-          },
-        ],
-        images: [...prev.images, previewUrl],
-      }));
+      setForm((prev) => {
+        const updatedImages = previewUrl
+          ? [...prev.images, previewUrl]
+          : [...prev.images];
+        return {
+          ...prev,
+          variants: [
+            ...prev.variants,
+            {
+              size: variant.size,
+              color: variant.color,
+              retail_price: variant.retail_price,
+              preview: previewUrl,
+              variantId: crypto.randomUUID(),
+            },
+          ],
+          images: updatedImages,
+        };
+      });
       setVariant({
         size: "",
         color: "",
@@ -83,7 +90,8 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         previewUrl: "",
       });
     } catch (err) {
-      setError("Failed to upload variant image", err);
+      console.error("Failed to upload variant image", err);
+      setError("Failed to upload variant image");
     } finally {
       setUploading(false);
     }
