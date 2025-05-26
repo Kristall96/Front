@@ -8,13 +8,21 @@ const ProductManagement = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 8;
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await secureAxios.get("/products");
-      setProducts(res.data);
+      const res = await secureAxios.get("/products", {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchQuery,
+        },
+      });
+      setProducts(res.data.products || []);
+      setTotalPages(res.data.pages || 1);
     } catch (err) {
       setError(err.response?.data?.message || "❌ Failed to fetch products");
     } finally {
@@ -39,22 +47,11 @@ const ProductManagement = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
-
-  const filtered = products.filter((p) =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const paginated = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  }, [currentPage, searchQuery]);
 
   return (
     <div className="space-y-8">
-      {/* Header + Actions */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h2 className="text-3xl font-bold text-black">Product Management</h2>
         <div className="flex gap-3">
@@ -118,7 +115,7 @@ const ProductManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((p) => (
+                {products.map((p) => (
                   <tr key={p._id} className="border-t hover:bg-gray-50">
                     <td className="px-4 py-2">
                       <img
