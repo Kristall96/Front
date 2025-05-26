@@ -19,11 +19,35 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     preview: "",
   });
 
-  const [imageUrl, setImageUrl] = useState(""); // temporary input
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await secureAxios.post("/upload/cloudinary", formData);
+      const url = res.data.secure_url;
+
+      setForm((prev) => ({
+        ...prev,
+        images: [...prev.images, url],
+        thumbnail: prev.images.length === 0 ? url : prev.thumbnail,
+      }));
+    } catch (err) {
+      console.error("Upload failed", err);
+      setError("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const addVariant = () => {
     if (!variant.size || !variant.color || !variant.retail_price) return;
@@ -35,16 +59,6 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       ],
     }));
     setVariant({ size: "", color: "", retail_price: "", preview: "" });
-  };
-
-  const addImage = () => {
-    if (!imageUrl) return;
-    setForm((prev) => ({
-      ...prev,
-      images: [...prev.images, imageUrl],
-      thumbnail: prev.images.length === 0 ? imageUrl : prev.thumbnail, // first becomes thumbnail
-    }));
-    setImageUrl("");
   };
 
   const handleSubmit = async (e) => {
@@ -65,7 +79,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       };
 
       await secureAxios.post("/products", payload);
-      onSuccess(); // refetch product list
+      onSuccess();
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create product.");
@@ -85,10 +99,10 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         </button>
 
         <h2 className="text-xl font-bold">Upload Manual Product</h2>
-
         {error && <p className="text-red-500">{error}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Basic Info */}
           <input
             className="w-full border p-2 rounded"
             placeholder="Title"
@@ -101,14 +115,12 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
               })
             }
           />
-
           <textarea
             className="w-full border p-2 rounded"
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
-
           <input
             type="number"
             className="w-full border p-2 rounded"
@@ -117,24 +129,17 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
 
-          {/* Cloudinary Images */}
+          {/* Image Upload */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
-            <h4 className="font-medium">Product Images (Cloudinary URLs)</h4>
-            <div className="flex gap-2">
-              <input
-                className="flex-1 border p-2 rounded"
-                placeholder="Image URL"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={addImage}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Add
-              </button>
-            </div>
+            <label className="font-medium">Product Images (Cloudinary)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              disabled={uploading}
+            />
+            {uploading && <p className="text-sm text-blue-600">Uploading...</p>}
 
             {form.images.length > 0 && (
               <ul className="space-y-1">
@@ -205,16 +210,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             </button>
           </div>
 
-          {form.variants.length > 0 && (
-            <ul className="list-disc list-inside text-sm text-gray-700">
-              {form.variants.map((v, i) => (
-                <li key={i}>
-                  {v.size} • {v.color} • ${v.retail_price}
-                </li>
-              ))}
-            </ul>
-          )}
-
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
