@@ -67,30 +67,17 @@ const SingleProductPage = () => {
 
             {/* Variant Dropdown */}
             {product.variants?.length > 0 && (
-              <div className="mt-6">
-                <label
-                  htmlFor="variant-select"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Choose Variant
-                </label>
-                <select
-                  id="variant-select"
-                  className="w-full border rounded-md p-2 text-sm focus:ring focus:ring-blue-200"
-                  value={selectedVariant?.variantId || ""}
-                  onChange={(e) => {
-                    const selected = product.variants.find(
-                      (v) => v.variantId === e.target.value
-                    );
-                    setSelectedVariant(selected);
-                  }}
-                >
+              <div className="mt-12">
+                <h3 className="text-xl font-semibold mb-4 text-gray-800">
+                  Available Variants
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {product.variants.map((v) => (
-                    <option key={v.variantId} value={v.variantId}>
-                      {v.size} • {v.color} • ${v.retail_price}
-                    </option>
+                    <div key={v.variantId} className="...">
+                      ...
+                    </div>
                   ))}
-                </select>
+                </div>
               </div>
             )}
           </div>
