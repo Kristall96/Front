@@ -42,15 +42,17 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         thumbnail: prev.images.length === 0 ? url : prev.thumbnail,
       }));
     } catch (err) {
-      console.error("Upload failed", err);
-      setError("Image upload failed");
+      console.error("Image upload failed", err);
+      setError("❌ Image upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
   };
 
   const addVariant = () => {
-    if (!variant.size || !variant.color || !variant.retail_price) return;
+    const { size, color, retail_price } = variant;
+    if (!size || !color || !retail_price) return;
+
     setForm((prev) => ({
       ...prev,
       variants: [
@@ -58,6 +60,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         { ...variant, variantId: crypto.randomUUID() },
       ],
     }));
+
     setVariant({ size: "", color: "", retail_price: "", preview: "" });
   };
 
@@ -70,19 +73,19 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       const payload = {
         ...form,
         price: parseFloat(form.price),
+        imageUrl: form.thumbnail,
+        source: "manual",
         variants: form.variants.map((v) => ({
           ...v,
           retail_price: parseFloat(v.retail_price),
         })),
-        imageUrl: form.thumbnail,
-        source: "manual",
       };
 
       await secureAxios.post("/products", payload);
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create product.");
+      setError(err.response?.data?.message || "❌ Failed to create product.");
     } finally {
       setLoading(false);
     }
@@ -102,7 +105,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         {error && <p className="text-red-500">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Basic Info */}
+          {/* Title & Info */}
           <input
             className="w-full border p-2 rounded"
             placeholder="Title"
@@ -136,8 +139,8 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
               disabled={uploading}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
             />
             {uploading && <p className="text-sm text-blue-600">Uploading...</p>}
 
@@ -163,7 +166,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             )}
           </div>
 
-          {/* Variants */}
+          {/* Variant Builder */}
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <h4 className="font-medium">Add Variant</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -209,6 +212,16 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
               Add Variant
             </button>
           </div>
+
+          {form.variants.length > 0 && (
+            <ul className="list-disc list-inside text-sm text-gray-700">
+              {form.variants.map((v, i) => (
+                <li key={i}>
+                  {v.size} • {v.color} • ${v.retail_price}
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Submit */}
           <button
