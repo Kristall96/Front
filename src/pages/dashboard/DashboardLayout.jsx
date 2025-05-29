@@ -60,10 +60,10 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         } bg-gray-900 text-slate-100 shadow-xl overflow-hidden`}
       >
         {/* Toggle Button */}
-        <div className="absolute top-4 right-[-14px] z-10">
+        <div className="absolute -right-3 top-4 z-20">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="bg-slate-700 hover:bg-slate-600 text-white p-1.5 rounded-full shadow-lg ring-1 ring-slate-500 hover:ring-blue-500 transition-all duration-300"
+            className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-full shadow-xl ring-1 ring-slate-600 hover:ring-blue-400 backdrop-blur transition-all duration-300"
             aria-label="Toggle Sidebar"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
