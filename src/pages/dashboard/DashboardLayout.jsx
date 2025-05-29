@@ -25,6 +25,11 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       { key: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
       { key: "overview", label: "Overview", icon: <BarChart size={18} /> },
       { key: "products", label: "Products", icon: <Package size={18} /> },
+      {
+        key: "products-management",
+        label: "Products",
+        icon: <Package size={18} />,
+      },
       { key: "users", label: "Manage Users", icon: <Users size={18} /> },
     ],
     moderator: [
