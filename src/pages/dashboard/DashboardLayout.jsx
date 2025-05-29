@@ -11,6 +11,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  LayoutDashboard,
 } from "lucide-react";
 
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
