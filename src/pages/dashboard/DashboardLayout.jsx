@@ -51,18 +51,18 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const links = navItems[user?.role] || [];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 text-slate-800">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-50 text-slate-800">
       {/* Sidebar */}
       <aside
         className={`relative transition-all duration-300 ${
           collapsed ? "w-20" : "w-64"
-        } bg-white/90 backdrop-blur-md shadow-xl border-r border-slate-200`}
+        } bg-gray-900 text-slate-100 shadow-xl`}
       >
         {/* Toggle Button */}
         <div className="absolute top-4 right-[-14px] z-10">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-1.5 rounded-full shadow-md transition-all duration-300"
+            className="bg-slate-700 hover:bg-slate-600 text-white p-1.5 rounded-full shadow-lg ring-1 ring-slate-500 hover:ring-blue-500 transition-all duration-300"
             aria-label="Toggle Sidebar"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -70,7 +70,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         </div>
 
         {/* Header */}
-        <div className="px-4 py-5 border-b border-slate-200">
+        <div className="px-4 py-5 border-b border-slate-600">
           <h2
             className={`text-xl font-bold transition-opacity duration-200 ${
               collapsed ? "opacity-0 hidden" : "opacity-100"
@@ -89,8 +89,8 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
               className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
                 ${
                   activeTab === link.key
-                    ? "bg-blue-100 text-blue-600 font-semibold"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "bg-slate-800 text-white font-semibold"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
             >
               <span className="mr-3">{link.icon}</span>
