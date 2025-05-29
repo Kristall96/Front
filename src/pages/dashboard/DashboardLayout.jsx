@@ -55,12 +55,12 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-50 text-slate-800">
       {/* Sidebar */}
       <aside
-        className={`relative transition-all duration-300 ease-in-out flex flex-col ${
+        className={`relative overflow-visible transition-all duration-300 ease-in-out flex flex-col ${
           collapsed ? "w-[80px]" : "w-64"
         } bg-gray-900 text-slate-100 shadow-xl overflow-hidden`}
       >
         {/* Toggle Button */}
-        <div className="flex justify-end px-4 pt-4">
+        <div className="absolute top-5 right-[-12px] z-30">
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-full shadow-xl ring-1 ring-slate-600 hover:ring-blue-400 backdrop-blur transition-all duration-300"
