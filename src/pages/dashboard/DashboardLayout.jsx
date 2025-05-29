@@ -70,7 +70,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         </div>
 
         {/* Header */}
-        <div className="px-4 py-5 border-b border-slate-600">
+        <div className=" border-b border-slate-600">
           <h2
             className={`text-xl font-bold transition-opacity duration-200 ${
               collapsed ? "opacity-0 hidden" : "opacity-100"
