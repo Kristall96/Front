@@ -147,70 +147,68 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
   };
 
   return (
-    <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white p-6 w-full max-w-2xl rounded-lg shadow space-y-4 relative">
+    <div className="fixed inset-0 backdrop-blur-md bg-black/60 z-50 flex items-center justify-center">
+      <div className="bg-[#1a1a1a] text-white p-6 w-full max-w-3xl rounded-xl shadow-lg space-y-6 relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-3 text-xl font-bold text-gray-500 hover:text-red-600"
+          className="absolute top-3 right-4 text-2xl font-bold text-gray-400 hover:text-red-500"
         >
           ×
         </button>
 
-        <h2 className="text-xl font-bold">
-          {editProduct ? "Edit Product" : "Upload Manual Product"}
-        </h2>
-        {error && <p className="text-red-500">{error}</p>}
+        <h2 className="text-2xl font-semibold">📦 Upload Manual Product</h2>
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                title: e.target.value,
-                slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
-              })
-            }
-          />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              className="bg-black border border-gray-600 p-2 rounded"
+              placeholder="Title"
+              value={form.title}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  title: e.target.value,
+                  slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
+                })
+              }
+            />
+            <input
+              className="bg-black border border-gray-600 p-2 rounded"
+              placeholder="Base Price"
+              type="number"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+            />
+            <input
+              className="bg-black border border-gray-600 p-2 rounded"
+              placeholder="Quantity"
+              type="number"
+              min={0}
+              value={form.quantity}
+              onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+            />
+            <input
+              className="bg-black border border-gray-600 p-2 rounded"
+              placeholder="Low Stock Threshold"
+              type="number"
+              min={1}
+              value={form.lowStockThreshold}
+              onChange={(e) =>
+                setForm({ ...form, lowStockThreshold: e.target.value })
+              }
+            />
+          </div>
 
           <textarea
-            className="w-full border p-2 rounded"
+            className="w-full bg-black border border-gray-600 p-2 rounded"
             placeholder="Description"
+            rows={3}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
 
-          <input
-            type="number"
-            className="w-full border p-2 rounded"
-            placeholder="Base Price"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-          />
-
-          <input
-            type="number"
-            className="w-full border p-2 rounded"
-            placeholder="Quantity"
-            min={0}
-            value={form.quantity}
-            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-          />
-
-          <input
-            type="number"
-            className="w-full border p-2 rounded"
-            placeholder="Low Stock Threshold"
-            min={1}
-            value={form.lowStockThreshold}
-            onChange={(e) =>
-              setForm({ ...form, lowStockThreshold: e.target.value })
-            }
-          />
-
-          <label className="flex items-center gap-2">
+          <label className="inline-flex items-center gap-2">
             <input
               type="checkbox"
               checked={form.published}
@@ -218,21 +216,21 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 setForm({ ...form, published: e.target.checked })
               }
             />
-            <span className="text-sm text-gray-700">Publish immediately</span>
+            <span className="text-sm">Publish immediately</span>
           </label>
 
-          <div className="bg-gray-50 p-3 rounded space-y-2">
-            <label className="font-medium">Product Images</label>
+          <div className="bg-[#2a2a2a] p-4 rounded space-y-3">
+            <h3 className="font-semibold">🖼️ Product Images</h3>
             <input
               type="file"
               accept="image/*"
               onChange={handleProductImageUpload}
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              className="block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
               disabled={uploading}
             />
-            {uploading && <p className="text-sm text-blue-600">Uploading...</p>}
+            {uploading && <p className="text-sm text-blue-400">Uploading...</p>}
             {form.images.length > 0 && (
-              <ul className="space-y-1">
+              <ul className="flex flex-wrap gap-2">
                 {form.images.map((img, i) => (
                   <li key={i} className="flex items-center gap-2">
                     <input
@@ -244,7 +242,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                     <img
                       src={img}
                       alt={`preview-${i}`}
-                      className="w-12 h-12 rounded border object-cover"
+                      className="w-14 h-14 object-cover rounded border border-gray-500"
                     />
                   </li>
                 ))}
@@ -252,11 +250,11 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
             )}
           </div>
 
-          <div className="bg-gray-50 p-3 rounded space-y-2">
-            <h4 className="font-medium">Add Variant</h4>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 items-center">
+          <div className="bg-[#2a2a2a] p-4 rounded space-y-3">
+            <h3 className="font-semibold">🎨 Add Variant</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <input
-                className="border p-2 rounded"
+                className="bg-black border border-gray-600 p-2 rounded"
                 placeholder="Size"
                 value={variant.size}
                 onChange={(e) =>
@@ -264,7 +262,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 }
               />
               <input
-                className="border p-2 rounded"
+                className="bg-black border border-gray-600 p-2 rounded"
                 placeholder="Color"
                 value={variant.color}
                 onChange={(e) =>
@@ -272,9 +270,9 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 }
               />
               <input
-                type="number"
-                className="border p-2 rounded"
+                className="bg-black border border-gray-600 p-2 rounded"
                 placeholder="Retail Price"
+                type="number"
                 value={variant.retail_price}
                 onChange={(e) =>
                   setVariant({ ...variant, retail_price: e.target.value })
@@ -286,15 +284,16 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 onChange={(e) =>
                   setVariant({ ...variant, previewFile: e.target.files[0] })
                 }
+                className="text-white text-sm"
               />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-400 self-center">
                 {variant.previewFile?.name || "No file chosen"}
               </span>
             </div>
             <button
               type="button"
               onClick={addVariant}
-              className="px-3 py-1 mt-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+              className="px-4 py-2 mt-2 bg-blue-700 hover:bg-blue-800 text-white rounded"
               disabled={uploading}
             >
               Add Variant
@@ -303,7 +302,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg"
             disabled={loading}
           >
             {loading
