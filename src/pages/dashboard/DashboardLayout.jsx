@@ -1,104 +1,68 @@
 import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
-import { LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  User,
+  ShoppingCart,
+  Heart,
+  BarChart,
+  Package,
+  Users,
+  ShieldCheck,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
+  // Define role-based links with unique icons
   const navItems = {
     admin: [
-      {
-        key: "profile",
-        label: "My Profile",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "orders",
-        label: "My Orders",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "wishlist",
-        label: "Wishlist",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "overview",
-        label: "Overview",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "products",
-        label: "Products",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "users",
-        label: "Manage Users",
-        icon: <LayoutDashboard size={18} />,
-      },
+      { key: "profile", label: "My Profile", icon: <User size={18} /> },
+      { key: "orders", label: "My Orders", icon: <ShoppingCart size={18} /> },
+      { key: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
+      { key: "overview", label: "Overview", icon: <BarChart size={18} /> },
+      { key: "products", label: "Products", icon: <Package size={18} /> },
+      { key: "users", label: "Manage Users", icon: <Users size={18} /> },
     ],
     moderator: [
-      {
-        key: "profile",
-        label: "My Profile",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "orders",
-        label: "My Orders",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "wishlist",
-        label: "Wishlist",
-        icon: <LayoutDashboard size={18} />,
-      },
+      { key: "profile", label: "My Profile", icon: <User size={18} /> },
+      { key: "orders", label: "My Orders", icon: <ShoppingCart size={18} /> },
+      { key: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
       {
         key: "panel",
         label: "Moderation Panel",
-        icon: <LayoutDashboard size={18} />,
+        icon: <ShieldCheck size={18} />,
       },
       {
         key: "complaints",
         label: "Complaints",
-        icon: <LayoutDashboard size={18} />,
+        icon: <AlertCircle size={18} />,
       },
     ],
     user: [
-      {
-        key: "profile",
-        label: "My Profile",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "orders",
-        label: "My Orders",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "wishlist",
-        label: "Wishlist",
-        icon: <LayoutDashboard size={18} />,
-      },
+      { key: "profile", label: "My Profile", icon: <User size={18} /> },
+      { key: "orders", label: "My Orders", icon: <ShoppingCart size={18} /> },
+      { key: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
     ],
   };
 
   const links = navItems[user?.role] || [];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 text-gray-800">
+    <div className="flex min-h-screen bg-gradient-to-br from-white to-slate-100 text-slate-700">
       {/* Sidebar */}
       <aside
         className={`${
           collapsed ? "w-20" : "w-64"
-        } relative transition-all duration-300 bg-white shadow-xl border-r border-gray-200`}
+        } relative transition-all duration-300 bg-white shadow-lg border-r border-gray-200`}
       >
-        {/* Top bar */}
+        {/* Top bar with toggle */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <h2
-            className={`text-xl font-bold text-gray-800 transition-all duration-200 ${
+            className={`text-xl font-bold transition-opacity duration-200 ${
               collapsed ? "opacity-0 hidden" : "opacity-100"
             }`}
           >
@@ -113,7 +77,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
           </button>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation Links */}
         <nav className="mt-4 space-y-1 px-2">
           {links.map((link) => (
             <button
@@ -123,7 +87,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
                 ${
                   activeTab === link.key
                     ? "bg-blue-100 text-blue-600 font-semibold"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-slate-600 hover:bg-gray-100"
                 }`}
             >
               <span className="mr-3">{link.icon}</span>
@@ -136,7 +100,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+      <main className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</main>
     </div>
   );
 };
