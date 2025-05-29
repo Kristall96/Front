@@ -22,6 +22,7 @@ const ProductManagement = () => {
           page: currentPage,
           limit: itemsPerPage,
           search: searchQuery,
+          showAll: true,
         },
       });
       setProducts(res.data.products || []);
