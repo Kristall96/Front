@@ -19,6 +19,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
     size: "",
     color: "",
     retail_price: "",
+    quantity: 0,
     previewFile: null,
     previewUrl: "",
   });
@@ -91,6 +92,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
               size: variant.size,
               color: variant.color,
               retail_price: variant.retail_price,
+              quantity: parseInt(variant.quantity) || 0,
               preview: previewUrl,
               variantId: crypto.randomUUID(),
             },
@@ -102,6 +104,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
         size: "",
         color: "",
         retail_price: "",
+        quantity: 0,
         previewFile: null,
         previewUrl: "",
       });
@@ -126,6 +129,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
         variants: form.variants.map((v) => ({
           ...v,
           retail_price: parseFloat(v.retail_price),
+          quantity: parseInt(v.quantity) || 0,
         })),
         imageUrl: form.thumbnail,
         source: "manual",
@@ -252,7 +256,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
 
           <div className="bg-[#2a2a2a] p-4 rounded space-y-3">
             <h3 className="font-semibold">🎨 Add Variant</h3>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               <input
                 className="bg-black border border-gray-600 p-2 rounded"
                 placeholder="Size"
@@ -276,6 +280,15 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 value={variant.retail_price}
                 onChange={(e) =>
                   setVariant({ ...variant, retail_price: e.target.value })
+                }
+              />
+              <input
+                className="bg-black border border-gray-600 p-2 rounded"
+                placeholder="Variant Quantity"
+                type="number"
+                value={variant.quantity}
+                onChange={(e) =>
+                  setVariant({ ...variant, quantity: e.target.value })
                 }
               />
               <input
