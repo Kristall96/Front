@@ -4,6 +4,7 @@ import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import UserManagement from "./sections/UserManagement";
+import ProductManagement from "./sections/ProductManagement1"; // ✅ NEW
 import ProductManagementSystem from "./sections/ProductManagementSystem"; // ✅ NEW
 import Navbar from "../../components/Navbar";
 
@@ -58,8 +59,9 @@ const AdminDashboard = () => {
       case "users":
         return <UserManagement />;
       case "products":
+        return <ProductManagement />; // ✅ NEW
+      case "products-management":
         return <ProductManagementSystem />;
-
       case "overview":
         return adminStats ? (
           <div className="bg-white p-4 rounded shadow">
