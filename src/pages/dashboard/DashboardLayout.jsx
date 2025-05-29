@@ -1,85 +1,142 @@
 import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // or any icon library
+import { LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
 
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
-  const uniqueLinks = {
+  const navItems = {
     admin: [
-      { key: "profile", label: "My Profile" },
-      { key: "orders", label: "My Orders" },
-      { key: "wishlist", label: "Wishlist" },
-      { key: "overview", label: "Overview" },
-      { key: "products", label: "Products" },
-      { key: "users", label: "Manage Users" },
+      {
+        key: "profile",
+        label: "My Profile",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "orders",
+        label: "My Orders",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "wishlist",
+        label: "Wishlist",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "overview",
+        label: "Overview",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "products",
+        label: "Products",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "users",
+        label: "Manage Users",
+        icon: <LayoutDashboard size={18} />,
+      },
     ],
     moderator: [
-      { key: "profile", label: "My Profile" },
-      { key: "orders", label: "My Orders" },
-      { key: "wishlist", label: "Wishlist" },
-      { key: "panel", label: "Moderation Panel" },
-      { key: "complaints", label: "Complaints" },
+      {
+        key: "profile",
+        label: "My Profile",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "orders",
+        label: "My Orders",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "wishlist",
+        label: "Wishlist",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "panel",
+        label: "Moderation Panel",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "complaints",
+        label: "Complaints",
+        icon: <LayoutDashboard size={18} />,
+      },
     ],
     user: [
-      { key: "profile", label: "My Profile" },
-      { key: "orders", label: "My Orders" },
-      { key: "wishlist", label: "Wishlist" },
+      {
+        key: "profile",
+        label: "My Profile",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "orders",
+        label: "My Orders",
+        icon: <LayoutDashboard size={18} />,
+      },
+      {
+        key: "wishlist",
+        label: "Wishlist",
+        icon: <LayoutDashboard size={18} />,
+      },
     ],
   };
 
-  const roleLinks = uniqueLinks[user?.role] || [];
+  const links = navItems[user?.role] || [];
 
   return (
-    <div className="flex min-h-screen bg-gray-100 text-gray-800">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 text-gray-800">
       {/* Sidebar */}
       <aside
         className={`${
           collapsed ? "w-20" : "w-64"
-        } bg-white shadow-md p-4 transition-all duration-300 flex flex-col justify-between`}
+        } relative transition-all duration-300 bg-white shadow-xl border-r border-gray-200`}
       >
-        <div>
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <h2
-            className={`text-xl font-bold mb-6 transition-opacity duration-200 ${
+            className={`text-xl font-bold text-gray-800 transition-all duration-200 ${
               collapsed ? "opacity-0 hidden" : "opacity-100"
             }`}
           >
             Dashboard
           </h2>
-          <nav className="flex flex-col space-y-3">
-            {roleLinks.map((link) => (
-              <button
-                key={link.key}
-                onClick={() => setActiveTab(link.key)}
-                className={`text-left font-medium transition-colors ${
-                  activeTab === link.key
-                    ? "text-blue-600 font-semibold"
-                    : "hover:text-blue-600"
-                }`}
-              >
-                {collapsed ? (
-                  <div className="w-full h-6 rounded bg-gray-200 animate-pulse"></div>
-                ) : (
-                  link.label
-                )}
-              </button>
-            ))}
-          </nav>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded hover:bg-gray-100 transition"
+            aria-label="Toggle Sidebar"
+          >
+            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
 
-        {/* Collapse/Expand Button */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="mt-6 text-gray-500 hover:text-blue-600 transition"
-          aria-label="Toggle sidebar"
-        >
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
+        {/* Navigation */}
+        <nav className="mt-4 space-y-1 px-2">
+          {links.map((link) => (
+            <button
+              key={link.key}
+              onClick={() => setActiveTab(link.key)}
+              className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                ${
+                  activeTab === link.key
+                    ? "bg-blue-100 text-blue-600 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+              <span className="mr-3">{link.icon}</span>
+              <span className={`${collapsed ? "hidden" : "block"}`}>
+                {link.label}
+              </span>
+            </button>
+          ))}
+        </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 sm:p-8">{children}</main>
+      <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );
 };
