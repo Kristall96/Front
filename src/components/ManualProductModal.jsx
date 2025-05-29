@@ -5,6 +5,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
   const [form, setForm] = useState({
     title: "",
     slug: "",
+    category: "",
     description: "",
     price: "",
     images: [],
@@ -78,6 +79,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
       if (variant.previewFile) {
         previewUrl = await handleVariantImageUpload(variant.previewFile);
       }
+
       setForm((prev) => {
         const updatedImages =
           previewUrl && !prev.images.includes(previewUrl)
@@ -100,6 +102,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
           images: updatedImages,
         };
       });
+
       setVariant({
         size: "",
         color: "",
@@ -179,6 +182,12 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
             />
             <input
               className="bg-black border border-gray-600 p-2 rounded"
+              placeholder="Category"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            />
+            <input
+              className="bg-black border border-gray-600 p-2 rounded"
               placeholder="Base Price"
               type="number"
               value={form.price}
@@ -223,6 +232,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
             <span className="text-sm">Publish immediately</span>
           </label>
 
+          {/* Product Images */}
           <div className="bg-[#2a2a2a] p-4 rounded space-y-3">
             <h3 className="font-semibold">🖼️ Product Images</h3>
             <input
@@ -234,9 +244,9 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
             />
             {uploading && <p className="text-sm text-blue-400">Uploading...</p>}
             {form.images.length > 0 && (
-              <ul className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {form.images.map((img, i) => (
-                  <li key={i} className="flex items-center gap-2">
+                  <label key={i} className="flex flex-col items-center gap-1">
                     <input
                       type="radio"
                       name="thumbnail"
@@ -245,15 +255,16 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                     />
                     <img
                       src={img}
-                      alt={`preview-${i}`}
-                      className="w-14 h-14 object-cover rounded border border-gray-500"
+                      alt={`thumb-${i}`}
+                      className="w-14 h-14 rounded object-cover border border-gray-500"
                     />
-                  </li>
+                  </label>
                 ))}
-              </ul>
+              </div>
             )}
           </div>
 
+          {/* Variants */}
           <div className="bg-[#2a2a2a] p-4 rounded space-y-3">
             <h3 className="font-semibold">🎨 Add Variant</h3>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -284,7 +295,7 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
               />
               <input
                 className="bg-black border border-gray-600 p-2 rounded"
-                placeholder="Variant Quantity"
+                placeholder="Quantity"
                 type="number"
                 value={variant.quantity}
                 onChange={(e) =>
@@ -299,9 +310,9 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
                 }
                 className="text-white text-sm"
               />
-              <span className="text-xs text-gray-400 self-center">
+              <div className="text-xs text-gray-400 self-center truncate">
                 {variant.previewFile?.name || "No file chosen"}
-              </span>
+              </div>
             </div>
             <button
               type="button"
