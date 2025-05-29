@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import secureAxios from "../utils/secureAxios";
 
-const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
+const ManualProductModal = ({ isOpen, onClose, onSuccess, editProduct }) => {
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -10,6 +10,9 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
     images: [],
     thumbnail: "",
     variants: [],
+    quantity: 0,
+    published: false,
+    lowStockThreshold: 3,
   });
 
   const [variant, setVariant] = useState({
@@ -23,6 +26,17 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (editProduct) {
+      setForm({
+        ...editProduct,
+        price: editProduct.price || "",
+        quantity: editProduct.quantity || 0,
+        lowStockThreshold: editProduct.lowStockThreshold || 3,
+      });
+    }
+  }, [editProduct]);
 
   if (!isOpen) return null;
 
@@ -64,9 +78,11 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         previewUrl = await handleVariantImageUpload(variant.previewFile);
       }
       setForm((prev) => {
-        const updatedImages = previewUrl
-          ? [...prev.images, previewUrl]
-          : [...prev.images];
+        const updatedImages =
+          previewUrl && !prev.images.includes(previewUrl)
+            ? [...prev.images, previewUrl]
+            : [...prev.images];
+
         return {
           ...prev,
           variants: [
@@ -105,6 +121,8 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
       const payload = {
         ...form,
         price: parseFloat(form.price),
+        quantity: parseInt(form.quantity),
+        lowStockThreshold: parseInt(form.lowStockThreshold),
         variants: form.variants.map((v) => ({
           ...v,
           retail_price: parseFloat(v.retail_price),
@@ -112,11 +130,17 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
         imageUrl: form.thumbnail,
         source: "manual",
       };
-      await secureAxios.post("/products", payload);
+
+      if (editProduct) {
+        await secureAxios.put(`/products/${editProduct._id}`, payload);
+      } else {
+        await secureAxios.post("/products", payload);
+      }
+
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create product.");
+      setError(err.response?.data?.message || "Failed to save product.");
     } finally {
       setLoading(false);
     }
@@ -132,7 +156,9 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
           ×
         </button>
 
-        <h2 className="text-xl font-bold">Upload Manual Product</h2>
+        <h2 className="text-xl font-bold">
+          {editProduct ? "Edit Product" : "Upload Manual Product"}
+        </h2>
         {error && <p className="text-red-500">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -148,12 +174,14 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
               })
             }
           />
+
           <textarea
             className="w-full border p-2 rounded"
             placeholder="Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
+
           <input
             type="number"
             className="w-full border p-2 rounded"
@@ -161,6 +189,37 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
+
+          <input
+            type="number"
+            className="w-full border p-2 rounded"
+            placeholder="Quantity"
+            min={0}
+            value={form.quantity}
+            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          />
+
+          <input
+            type="number"
+            className="w-full border p-2 rounded"
+            placeholder="Low Stock Threshold"
+            min={1}
+            value={form.lowStockThreshold}
+            onChange={(e) =>
+              setForm({ ...form, lowStockThreshold: e.target.value })
+            }
+          />
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.published}
+              onChange={(e) =>
+                setForm({ ...form, published: e.target.checked })
+              }
+            />
+            <span className="text-sm text-gray-700">Publish immediately</span>
+          </label>
 
           <div className="bg-gray-50 p-3 rounded space-y-2">
             <label className="font-medium">Product Images</label>
@@ -247,7 +306,11 @@ const ManualProductModal = ({ isOpen, onClose, onSuccess }) => {
             className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
             disabled={loading}
           >
-            {loading ? "Uploading..." : "Create Product"}
+            {loading
+              ? "Saving..."
+              : editProduct
+              ? "Update Product"
+              : "Create Product"}
           </button>
         </form>
       </div>
