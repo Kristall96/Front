@@ -60,7 +60,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         } bg-gray-900 text-slate-100 shadow-xl overflow-hidden`}
       >
         {/* Toggle Button */}
-        <div className="absolute -right-3 top-4 z-20">
+        <div className="flex justify-end px-4 pt-4">
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-full shadow-xl ring-1 ring-slate-600 hover:ring-blue-400 backdrop-blur transition-all duration-300"
