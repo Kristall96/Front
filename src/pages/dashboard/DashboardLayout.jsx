@@ -55,9 +55,9 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-50 text-slate-800">
       {/* Sidebar */}
       <aside
-        className={`relative transition-all duration-300 ${
-          collapsed ? "w-20" : "w-64"
-        } bg-gray-900 text-slate-100 shadow-xl`}
+        className={`relative transition-all duration-300 ease-in-out flex flex-col ${
+          collapsed ? "w-[80px]" : "w-64"
+        } bg-gray-900 text-slate-100 shadow-xl overflow-hidden`}
       >
         {/* Toggle Button */}
         <div className="absolute top-4 right-[-14px] z-10">
@@ -70,32 +70,36 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
           </button>
         </div>
 
+        {/* Sidebar Header */}
         <div className="px-4 py-5 border-b border-slate-600 flex items-center space-x-2">
-          <LayoutDashboard size={20} className="text-slate-300" />
+          <LayoutDashboard size={20} className="text-slate-300 shrink-0" />
           <h2
-            className={`text-xl font-bold transition-opacity duration-200 ${
-              collapsed ? "opacity-0 hidden" : "opacity-100"
+            className={`text-xl font-bold transition-all duration-300 origin-left whitespace-nowrap ${
+              collapsed ? "opacity-0 scale-90 w-0" : "opacity-100 scale-100"
             }`}
           >
             Dashboard
           </h2>
         </div>
 
-        {/* Nav Links */}
+        {/* Navigation Links */}
         <nav className="mt-4 space-y-1 px-2">
           {links.map((link) => (
             <button
               key={link.key}
               onClick={() => setActiveTab(link.key)}
-              className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                ${
-                  activeTab === link.key
-                    ? "bg-slate-800 text-white font-semibold"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
+              className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                activeTab === link.key
+                  ? "bg-slate-800 text-white font-semibold"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              }`}
             >
-              <span className="mr-3">{link.icon}</span>
-              <span className={`${collapsed ? "hidden" : "block"}`}>
+              <span className="mr-3 shrink-0">{link.icon}</span>
+              <span
+                className={`transition-all duration-300 origin-left ${
+                  collapsed ? "opacity-0 scale-90 w-0" : "opacity-100 scale-100"
+                }`}
+              >
                 {link.label}
               </span>
             </button>
