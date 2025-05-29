@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import secureAxios from "../../../utils/secureAxios";
+import secureAxios from "../../../../utils/secureAxios";
 import ProductForm from "./ProductForm"; // 💡 You'll create this next
 
 const ProductList = () => {

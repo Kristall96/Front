@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import secureAxios from "../../../utils/secureAxios";
+import secureAxios from "../../../../utils/secureAxios";
 
 const ProductForm = ({ onSubmit, initialData = {} }) => {
   const [form, setForm] = useState({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import secureAxios from "../../../utils/secureAxios";
+import secureAxios from "../../../../utils/secureAxios";
 
 const VariantManager = () => {
   const [variants, setVariants] = useState([]);
