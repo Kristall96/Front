@@ -100,8 +100,12 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       await onSubmit(cleanedForm);
     } catch (err) {
       const res = err?.response?.data;
-      setErrors(res?.details || {});
-      setGeneralError(res?.error || "Something went wrong. Please try again.");
+      const message =
+        typeof res?.error === "string" ? res.error : "Something went wrong.";
+      const fieldErrors = typeof res?.details === "object" ? res.details : {};
+
+      setGeneralError(message);
+      setErrors(fieldErrors);
     }
   };
 
@@ -119,99 +123,91 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         🧾 Product Details
       </h2>
 
-      {generalError && (
+      {typeof generalError === "string" && generalError && (
         <div className="bg-red-600 text-white px-4 py-2 rounded shadow">
           {generalError}
         </div>
       )}
 
-      {/* Title & Description */}
-      <div className="space-y-4">
-        <div>
-          <Label>Title *</Label>
-          <input
-            required
-            name="title"
-            type="text"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={form.title}
-            placeholder="E.g. Classic White T-Shirt"
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-          {renderError("title")}
-        </div>
-
-        <div>
-          <Label>Description</Label>
-          <textarea
-            name="description"
-            rows="4"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
-            value={form.description}
-            placeholder="Full product description..."
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-          {renderError("description")}
-        </div>
+      {/* --- TITLE --- */}
+      <div>
+        <Label>Title *</Label>
+        <input
+          required
+          name="title"
+          type="text"
+          className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        {renderError("title")}
       </div>
 
-      {/* Brand & Category */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label>Brand *</Label>
-          <select
-            name="brand"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={form.brand?._id || form.brand || ""}
-            onChange={(e) => {
-              const selected = brands.find((b) => b._id === e.target.value);
-              setForm({ ...form, brand: selected });
-            }}
-          >
-            <option value="">Select Brand</option>
-            {brands.map((b) => (
-              <option key={b._id} value={b._id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-          {renderError("brand")}
-        </div>
-
-        <div>
-          <Label>Category *</Label>
-          <select
-            name="category"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={form.category?._id || form.category || ""}
-            onChange={(e) => {
-              const selected = categories.find((c) => c._id === e.target.value);
-              setForm({
-                ...form,
-                category: selected,
-                subcategory: "",
-              });
-              setSubcategories(selected?.subcategories || []);
-            }}
-          >
-            <option value="">Select Category</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          {renderError("category")}
-        </div>
+      {/* --- DESCRIPTION --- */}
+      <div>
+        <Label>Description</Label>
+        <textarea
+          name="description"
+          rows="4"
+          className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
+        {renderError("description")}
       </div>
 
-      {/* Subcategory */}
+      {/* --- BRAND --- */}
+      <div>
+        <Label>Brand *</Label>
+        <select
+          name="brand"
+          className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
+          value={form.brand?._id || form.brand || ""}
+          onChange={(e) => {
+            const selected = brands.find((b) => b._id === e.target.value);
+            setForm({ ...form, brand: selected });
+          }}
+        >
+          <option value="">Select Brand</option>
+          {brands.map((b) => (
+            <option key={b._id} value={b._id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+        {renderError("brand")}
+      </div>
+
+      {/* --- CATEGORY --- */}
+      <div>
+        <Label>Category *</Label>
+        <select
+          name="category"
+          className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
+          value={form.category?._id || form.category || ""}
+          onChange={(e) => {
+            const selected = categories.find((c) => c._id === e.target.value);
+            setForm({ ...form, category: selected, subcategory: "" });
+            setSubcategories(selected?.subcategories || []);
+          }}
+        >
+          <option value="">Select Category</option>
+          {categories.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        {renderError("category")}
+      </div>
+
+      {/* --- SUBCATEGORY --- */}
       {subcategories.length > 0 && (
         <div>
           <Label>Subcategory</Label>
           <select
             name="subcategory"
-            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
             value={form.subcategory}
             onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
           >
@@ -226,7 +222,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </div>
       )}
 
-      {/* Pricing & Stock */}
+      {/* --- PRICING & STOCK --- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
           { label: "Base Price *", key: "basePrice" },
@@ -239,7 +235,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <input
               name={key}
               type="number"
-              className="no-spinner w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
               value={form[key] || ""}
               onChange={(e) =>
                 setForm({ ...form, [key]: +e.target.value || 0 })
@@ -250,7 +246,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         ))}
       </div>
 
-      {/* Images */}
+      {/* --- IMAGE UPLOAD --- */}
       <div>
         <Label>Upload Images</Label>
         <div className="relative w-fit">
@@ -271,7 +267,6 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         {uploading && (
           <p className="text-sm text-gray-400 mt-1">Uploading...</p>
         )}
-
         <div className="flex gap-2 flex-wrap mt-3">
           {form.images.map((img) => (
             <div key={img} className="relative border rounded shadow-sm">
@@ -279,16 +274,15 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               <button
                 type="button"
                 className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full ${
-                  form.thumbnail === img
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-600 text-white"
-                }`}
+                  form.thumbnail === img ? "bg-green-600" : "bg-gray-600"
+                } text-white`}
                 onClick={() => setForm({ ...form, thumbnail: img })}
               >
                 {form.thumbnail === img ? "✓" : "Set"}
               </button>
               <button
                 type="button"
+                className="absolute bottom-1 right-1 text-xs bg-red-500 text-white px-1 rounded"
                 onClick={() => {
                   const filtered = form.images.filter((f) => f !== img);
                   setForm({
@@ -300,7 +294,6 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                         : form.thumbnail,
                   });
                 }}
-                className="absolute bottom-1 right-1 text-xs bg-red-500 text-white px-1 rounded"
               >
                 ✕
               </button>
@@ -309,7 +302,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </div>
       </div>
 
-      {/* Variants */}
+      {/* --- VARIANTS --- */}
       <div>
         <Label>Variants</Label>
         {form.variants.map((v, i) => (
@@ -339,13 +332,11 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                 ))}
               </select>
             </div>
-
             <div className="flex-1">
               <Label className="text-xs">Value</Label>
               <input
                 type="text"
                 className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
-                placeholder="e.g. Red, XL"
                 value={v.value}
                 onChange={(e) => {
                   const updated = [...form.variants];
@@ -354,36 +345,34 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                 }}
               />
             </div>
-
             <button
               type="button"
+              className="h-9 mt-6 px-3 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
               onClick={() => {
                 const updated = [...form.variants];
                 updated.splice(i, 1);
                 setForm({ ...form, variants: updated });
               }}
-              className="h-9 mt-6 px-3 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
             >
               ✕
             </button>
           </div>
         ))}
-
         <button
           type="button"
+          className="mt-2 px-4 py-2 rounded border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white"
           onClick={() =>
             setForm({
               ...form,
               variants: [...form.variants, { variantCategory: "", value: "" }],
             })
           }
-          className="mt-2 inline-block px-4 py-2 rounded border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition"
         >
           + Add Variant
         </button>
       </div>
 
-      {/* Toggles */}
+      {/* --- TOGGLES --- */}
       <div className="flex gap-6 pt-2">
         <label className="flex items-center gap-2 text-gray-200">
           <input
