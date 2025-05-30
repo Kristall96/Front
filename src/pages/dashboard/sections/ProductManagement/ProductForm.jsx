@@ -113,7 +113,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <Label>Description</Label>
           <textarea
             rows="4"
-            className="textarea textarea-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
             value={form.description}
             placeholder="Full product description..."
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -198,7 +198,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <Label>{label}</Label>
             <input
               type="number"
-              className="input input-bordered w-full bg-gray-800 text-white border-gray-600"
+              className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               value={form[key] || ""}
               onChange={(e) =>
                 setForm({ ...form, [key]: +e.target.value || 0 })
