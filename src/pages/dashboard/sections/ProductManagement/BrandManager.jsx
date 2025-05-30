@@ -7,18 +7,18 @@ const BrandManager = () => {
   const [editingBrandId, setEditingBrandId] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
   const fetchBrands = async () => {
     try {
       const res = await secureAxios.get("/admin/brands");
       setBrands(res.data);
     } catch (err) {
-      console.error("Error fetching brands", err);
+      console.error("Fetch error:", err);
     }
   };
-
-  useEffect(() => {
-    fetchBrands();
-  }, []);
 
   const handleCreate = async () => {
     if (!newBrand.trim()) return;
@@ -28,9 +28,10 @@ const BrandManager = () => {
       setNewBrand("");
       fetchBrands();
     } catch (err) {
-      console.error("Error creating brand", err);
+      console.error("Create error:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleUpdate = async (id, name) => {
@@ -39,81 +40,82 @@ const BrandManager = () => {
       setEditingBrandId(null);
       fetchBrands();
     } catch (err) {
-      console.error("Error updating brand", err);
+      console.error("Update error:", err);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return;
+    if (!confirm("Delete this brand?")) return;
     try {
       await secureAxios.delete(`/admin/brands/${id}`);
       fetchBrands();
     } catch (err) {
-      console.error("Error deleting brand", err);
+      console.error("Delete error:", err);
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow space-y-6">
-      <h2 className="text-xl font-bold text-gray-700">🏷️ Manage Brands</h2>
+    <div className="bg-[#131a25] p-6 rounded-xl shadow-md space-y-6 border border-gray-700">
+      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        🏷️ Manage Brands
+      </h2>
 
-      {/* Add New Brand */}
-      <div className="flex items-center gap-2">
+      {/* Add Brand */}
+      <div className="flex gap-2">
         <input
-          type="text"
           value={newBrand}
           onChange={(e) => setNewBrand(e.target.value)}
           placeholder="New brand name"
-          className="input input-bordered w-full"
+          className="w-full p-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          className="btn btn-primary"
           onClick={handleCreate}
           disabled={loading}
+          className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
         >
-          + Add
+          {loading ? "Adding..." : "+ Add"}
         </button>
       </div>
 
-      {/* List of Brands */}
+      {/* Brand List */}
       {brands.map((brand) => (
         <div
           key={brand._id}
-          className="flex items-center justify-between border p-3 rounded bg-gray-50 mb-2"
+          className="bg-[#1b2431] rounded-lg p-4 text-white flex justify-between items-center shadow-sm"
         >
           {editingBrandId === brand._id ? (
             <input
               defaultValue={brand.name}
-              className="input input-sm input-bordered w-full"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleUpdate(brand._id, e.target.value);
                 }
               }}
+              className="w-full p-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
             />
           ) : (
-            <span className="font-medium text-gray-800">{brand.name}</span>
+            <span className="font-medium">{brand.name}</span>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-3 ml-4">
             {editingBrandId === brand._id ? (
               <button
-                className="btn btn-sm"
                 onClick={() => setEditingBrandId(null)}
+                className="text-sm text-gray-400 hover:text-red-400"
               >
                 Cancel
               </button>
             ) : (
               <button
-                className="btn btn-sm btn-outline"
                 onClick={() => setEditingBrandId(brand._id)}
+                className="text-sm text-blue-400 hover:underline"
               >
                 Edit
               </button>
             )}
             <button
-              className="btn btn-sm btn-error text-white"
               onClick={() => handleDelete(brand._id)}
+              className="text-sm text-red-500 hover:underline"
             >
               Delete
             </button>
