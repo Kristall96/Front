@@ -77,7 +77,6 @@ const BrandManager = () => {
           <Plus size={16} /> Add
         </button>
       </div>
-
       {/* Brand List */}
       {brands.map((brand) => (
         <div
@@ -92,31 +91,31 @@ const BrandManager = () => {
                   handleUpdate(brand._id, e.target.value);
                 }
               }}
-              className="w-full p-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
+              className="w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
             />
           ) : (
-            <span className="font-medium">{brand.name}</span>
+            <span className="font-medium text-lg">{brand.name}</span>
           )}
 
           <div className="flex gap-3 ml-4">
             {editingBrandId === brand._id ? (
               <button
                 onClick={() => setEditingBrandId(null)}
-                className="text-sm text-gray-400 hover:text-red-400"
+                className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
               >
                 Cancel
               </button>
             ) : (
               <button
                 onClick={() => setEditingBrandId(brand._id)}
-                className="text-sm text-blue-400 hover:underline"
+                className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
               >
                 Edit
               </button>
             )}
             <button
               onClick={() => handleDelete(brand._id)}
-              className="text-sm text-red-500 hover:underline"
+              className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
             >
               Delete
             </button>
