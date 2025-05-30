@@ -258,7 +258,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         {form.variants.map((v, i) => (
           <div
             key={i}
-            className="flex flex-wrap md:flex-nowrap gap-2 mb-2 items-center"
+            className="flex gap-3 items-start md:items-end mb-4 flex-wrap md:flex-nowrap"
           >
             <div className="flex-1">
               <Label className="text-xs">Category</Label>
@@ -305,7 +305,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                 updated.splice(i, 1);
                 setForm({ ...form, variants: updated });
               }}
-              className="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
+              className="h-9 mt-6 px-3 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
             >
               ✕
             </button>
