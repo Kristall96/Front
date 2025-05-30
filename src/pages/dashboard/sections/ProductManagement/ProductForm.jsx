@@ -73,7 +73,18 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(form);
+
+    const cleanedForm = {
+      ...form,
+      brand: form.brand?._id || form.brand,
+      category: form.category?._id || form.category,
+      variants: form.variants.map((v) => ({
+        variantCategory: v.variantCategory?._id || v.variantCategory,
+        value: v.value,
+      })),
+    };
+
+    onSubmit(cleanedForm);
   };
 
   return (
@@ -116,8 +127,11 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <Label>Brand *</Label>
           <select
             className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
-            value={form.brand}
-            onChange={(e) => setForm({ ...form, brand: e.target.value })}
+            value={form.brand?._id || form.brand || ""}
+            onChange={(e) => {
+              const selected = brands.find((b) => b._id === e.target.value);
+              setForm({ ...form, brand: selected });
+            }}
           >
             <option value="">Select Brand</option>
             {brands.map((b) => (
@@ -132,11 +146,15 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <Label>Category *</Label>
           <select
             className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
-            value={form.category}
+            value={form.category?._id || form.category || ""}
             onChange={(e) => {
-              const cat = categories.find((c) => c._id === e.target.value);
-              setForm({ ...form, category: e.target.value, subcategory: "" });
-              setSubcategories(cat?.subcategories || []);
+              const selected = categories.find((c) => c._id === e.target.value);
+              setForm({
+                ...form,
+                category: selected,
+                subcategory: "",
+              });
+              setSubcategories(selected?.subcategories || []);
             }}
           >
             <option value="">Select Category</option>
@@ -241,10 +259,13 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <div key={i} className="flex gap-2 mb-2 items-center">
             <select
               className="select select-sm bg-gray-800 text-white border-gray-600"
-              value={v.variantCategory}
+              value={v.variantCategory?._id || v.variantCategory || ""}
               onChange={(e) => {
+                const selected = variantCategories.find(
+                  (vc) => vc._id === e.target.value
+                );
                 const updated = [...form.variants];
-                updated[i].variantCategory = e.target.value;
+                updated[i].variantCategory = selected;
                 setForm({ ...form, variants: updated });
               }}
             >
