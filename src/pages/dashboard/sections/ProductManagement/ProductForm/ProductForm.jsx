@@ -29,9 +29,13 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
   const [subcategories, setSubcategories] = useState([]);
   const [variantCategories, setVariantCategories] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
 
   useEffect(() => {
-    if (initialData) setForm((prev) => ({ ...prev, ...initialData }));
+    if (initialData) {
+      setForm((prev) => ({ ...prev, ...initialData }));
+    }
     fetchMeta();
   }, []);
 
@@ -44,11 +48,15 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       setVariantCategories(variantCategories);
     } catch (err) {
       console.error("Metadata load failed", err);
+      setGeneralError("Failed to load form options.");
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setGeneralError("");
+
     const cleanedForm = {
       ...form,
       brand: form.brand?._id || form.brand,
@@ -58,8 +66,30 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         value: v.value,
       })),
     };
-    onSubmit(cleanedForm);
+
+    try {
+      await onSubmit(cleanedForm);
+    } catch (err) {
+      const res = err?.response?.data;
+
+      // Detailed field-level errors (like { title: 'Title is required' })
+      if (res?.errors && typeof res.errors === "object") {
+        setErrors(res.errors);
+      }
+
+      // General error fallback
+      const fallback =
+        typeof res?.error === "string"
+          ? res.error
+          : res?.error?.message || err.message || "Something went wrong.";
+      setGeneralError(fallback);
+    }
   };
+
+  const renderError = (field) =>
+    typeof errors[field] === "string" ? (
+      <p className="text-sm text-red-400 mt-1">{errors[field]}</p>
+    ) : null;
 
   return (
     <form
@@ -70,7 +100,13 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         🧾 Product Details
       </h2>
 
-      <ProductFields form={form} setForm={setForm} />
+      {typeof generalError === "string" && generalError && (
+        <div className="bg-red-600 text-white px-4 py-2 rounded shadow">
+          {generalError}
+        </div>
+      )}
+
+      <ProductFields form={form} setForm={setForm} renderError={renderError} />
       <ProductSelectors
         form={form}
         setForm={setForm}
@@ -78,6 +114,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         categories={categories}
         subcategories={subcategories}
         setSubcategories={setSubcategories}
+        renderError={renderError}
       />
       <ProductImageUploader
         form={form}
@@ -89,6 +126,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         form={form}
         setForm={setForm}
         variantCategories={variantCategories}
+        renderError={renderError}
       />
       <ToggleOptions form={form} setForm={setForm} />
       <button
