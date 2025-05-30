@@ -1,4 +1,3 @@
-// src/pages/dashboard/sections/ProfileSection.jsx
 import { useState, useEffect } from "react";
 import secureAxios from "../../../utils/secureAxios";
 
@@ -6,6 +5,7 @@ const ProfileSection = ({ user, refreshUser }) => {
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (user) setFormData({ ...user });
   }, [user]);
@@ -22,31 +22,30 @@ const ProfileSection = ({ user, refreshUser }) => {
 
     try {
       const { data } = await secureAxios.put("/users/me", formData);
-
-      // Optional: log in dev
-      if (import.meta.env.DEV) {
-        console.log("✅ Profile updated:", data.user);
-      }
-
+      if (import.meta.env.DEV) console.log("✅ Profile updated:", data.user);
       setMessage("✅ Profile updated successfully!");
       refreshUser?.();
     } catch (err) {
       const msg = err.response?.data?.message || "❌ Failed to update profile.";
       setMessage(msg);
-
-      if (import.meta.env.DEV) {
-        console.error("⚠️ Update error:", err);
-      }
+      if (import.meta.env.DEV) console.error("⚠️ Update error:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  const renderInput = (props) => (
+    <input
+      {...props}
+      className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  );
+
   return (
-    <div className="flex justify-center items-start min-h-screen bg-gray-100 px-4 py-10">
+    <div className="flex justify-center items-start px-4 py-10 bg-[#131a25] min-h-screen">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-5xl space-y-10 bg-white p-10 rounded-2xl shadow-xl border border-gray-300"
+        className="w-full max-w-5xl space-y-10 bg-[#1b2431] p-10 rounded-2xl shadow-xl border border-gray-700 text-white"
       >
         {/* 🖼️ Avatar & Level */}
         <div className="flex items-center gap-6 mb-8">
@@ -55,246 +54,214 @@ const ProfileSection = ({ user, refreshUser }) => {
               formData.profileImage || "https://example.com/default-avatar.png"
             }
             alt="Profile Avatar"
-            className="w-24 h-24 rounded-full border-2 border-black shadow"
+            className="w-24 h-24 rounded-full border-2 border-blue-500 shadow"
           />
           <div>
-            <h2 className="text-3xl font-bold text-black mb-1">
-              Edit Your Profile
-            </h2>
-            <p className="text-sm text-gray-600 font-medium">
+            <h2 className="text-3xl font-bold mb-1">Edit Your Profile</h2>
+            <p className="text-sm text-gray-300 font-medium">
               Level: {formData.level || 1}
             </p>
             {formData.badge && (
-              <span className="inline-block mt-1 px-3 py-1 text-xs bg-black text-white rounded-full shadow-sm">
-                badge: {formData.badge}
+              <span className="inline-block mt-1 px-3 py-1 text-xs bg-blue-600 text-white rounded-full shadow-sm">
+                Badge: {formData.badge}
               </span>
             )}
           </div>
         </div>
 
         {/* Identity Info */}
-        <fieldset className="border border-black/20 p-6 rounded-lg">
-          <legend className="font-semibold text-xl text-black mb-4">
-            Identity Info
-          </legend>
+        <fieldset className="border border-gray-600 p-6 rounded-lg">
+          <legend className="font-semibold text-xl mb-4">Identity Info</legend>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <input
-              name="username"
-              value={formData.username || ""}
-              onChange={handleChange}
-              placeholder="Username"
-              className="input"
-            />
-            <input
-              name="firstName"
-              value={formData.firstName || ""}
-              onChange={handleChange}
-              placeholder="First Name"
-              className="input"
-            />
-            <input
-              name="middleName"
-              value={formData.middleName || ""}
-              onChange={handleChange}
-              placeholder="Middle Name"
-              className="input"
-            />
-            <input
-              name="lastName"
-              value={formData.lastName || ""}
-              onChange={handleChange}
-              placeholder="Last Name"
-              className="input"
-            />
+            {renderInput({
+              name: "username",
+              value: formData.username || "",
+              onChange: handleChange,
+              placeholder: "Username",
+            })}
+            {renderInput({
+              name: "firstName",
+              value: formData.firstName || "",
+              onChange: handleChange,
+              placeholder: "First Name",
+            })}
+            {renderInput({
+              name: "middleName",
+              value: formData.middleName || "",
+              onChange: handleChange,
+              placeholder: "Middle Name",
+            })}
+            {renderInput({
+              name: "lastName",
+              value: formData.lastName || "",
+              onChange: handleChange,
+              placeholder: "Last Name",
+            })}
             <textarea
               name="bio"
               value={formData.bio || ""}
               onChange={handleChange}
               placeholder="Bio"
               rows={2}
-              className="input col-span-full resize-none"
+              className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 col-span-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </fieldset>
 
         {/* Contact Info */}
-        <fieldset className="border border-black/20 p-6 rounded-lg">
-          <legend className="font-semibold text-xl text-black mb-4">
-            Contact Info
-          </legend>
+        <fieldset className="border border-gray-600 p-6 rounded-lg">
+          <legend className="font-semibold text-xl mb-4">Contact Info</legend>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <input
-              name="email"
-              value={formData.email || ""}
-              onChange={handleChange}
-              placeholder="Email"
-              className="input"
-            />
-            <input
-              name="secondaryEmail"
-              value={formData.secondaryEmail || ""}
-              onChange={handleChange}
-              placeholder="Secondary Email"
-              className="input"
-            />
-            <input
-              name="phone"
-              value={formData.phone || ""}
-              onChange={handleChange}
-              placeholder="Phone"
-              className="input"
-            />
-            <input
-              name="secondaryPhone"
-              value={formData.secondaryPhone || ""}
-              onChange={handleChange}
-              placeholder="Secondary Phone"
-              className="input"
-            />
+            {renderInput({
+              name: "email",
+              value: formData.email || "",
+              onChange: handleChange,
+              placeholder: "Email",
+            })}
+            {renderInput({
+              name: "secondaryEmail",
+              value: formData.secondaryEmail || "",
+              onChange: handleChange,
+              placeholder: "Secondary Email",
+            })}
+            {renderInput({
+              name: "phone",
+              value: formData.phone || "",
+              onChange: handleChange,
+              placeholder: "Phone",
+            })}
+            {renderInput({
+              name: "secondaryPhone",
+              value: formData.secondaryPhone || "",
+              onChange: handleChange,
+              placeholder: "Secondary Phone",
+            })}
           </div>
         </fieldset>
 
         {/* Permanent Address */}
-        <fieldset className="border border-black/20 p-6 rounded-lg">
-          <legend className="font-semibold text-xl text-black mb-4">
+        <fieldset className="border border-gray-600 p-6 rounded-lg">
+          <legend className="font-semibold text-xl mb-4">
             Permanent Address
           </legend>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <input
-              name="continent"
-              value={formData.continent || ""}
-              onChange={handleChange}
-              placeholder="Continent"
-              className="input"
-            />
-            <input
-              name="country"
-              value={formData.country || ""}
-              onChange={handleChange}
-              placeholder="Country"
-              className="input"
-            />
-            <input
-              name="region"
-              value={formData.region || ""}
-              onChange={handleChange}
-              placeholder="Region"
-              className="input"
-            />
-            <input
-              name="city"
-              value={formData.city || ""}
-              onChange={handleChange}
-              placeholder="City"
-              className="input"
-            />
-            <input
-              name="postalCode"
-              value={formData.postalCode || ""}
-              onChange={handleChange}
-              placeholder="Postal Code"
-              className="input"
-            />
-            <input
-              name="streetAddress"
-              value={formData.streetAddress || ""}
-              onChange={handleChange}
-              placeholder="Street Address"
-              className="input"
-            />
-            <input
-              name="apartment"
-              value={formData.apartment || ""}
-              onChange={handleChange}
-              placeholder="Apartment/Suite"
-              className="input"
-            />
+            {renderInput({
+              name: "continent",
+              value: formData.continent || "",
+              onChange: handleChange,
+              placeholder: "Continent",
+            })}
+            {renderInput({
+              name: "country",
+              value: formData.country || "",
+              onChange: handleChange,
+              placeholder: "Country",
+            })}
+            {renderInput({
+              name: "region",
+              value: formData.region || "",
+              onChange: handleChange,
+              placeholder: "Region",
+            })}
+            {renderInput({
+              name: "city",
+              value: formData.city || "",
+              onChange: handleChange,
+              placeholder: "City",
+            })}
+            {renderInput({
+              name: "postalCode",
+              value: formData.postalCode || "",
+              onChange: handleChange,
+              placeholder: "Postal Code",
+            })}
+            {renderInput({
+              name: "streetAddress",
+              value: formData.streetAddress || "",
+              onChange: handleChange,
+              placeholder: "Street Address",
+            })}
+            {renderInput({
+              name: "apartment",
+              value: formData.apartment || "",
+              onChange: handleChange,
+              placeholder: "Apartment/Suite",
+            })}
           </div>
         </fieldset>
 
         {/* Delivery Address */}
-        <fieldset className="border border-black/20 p-6 rounded-lg">
-          <legend className="font-semibold text-xl text-black mb-4">
+        <fieldset className="border border-gray-600 p-6 rounded-lg">
+          <legend className="font-semibold text-xl mb-4">
             Delivery Address
           </legend>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <input
-              name="deliveryFirstName"
-              value={formData.deliveryFirstName || ""}
-              onChange={handleChange}
-              placeholder="First Name"
-              className="input"
-            />
-            <input
-              name="deliveryMiddleName"
-              value={formData.deliveryMiddleName || ""}
-              onChange={handleChange}
-              placeholder="Middle Name"
-              className="input"
-            />
-            <input
-              name="deliveryLastName"
-              value={formData.deliveryLastName || ""}
-              onChange={handleChange}
-              placeholder="Last Name"
-              className="input"
-            />
-            <input
-              name="deliveryPhone"
-              value={formData.deliveryPhone || ""}
-              onChange={handleChange}
-              placeholder="Phone"
-              className="input"
-            />
-            <input
-              name="deliveryEmail"
-              value={formData.deliveryEmail || ""}
-              onChange={handleChange}
-              placeholder="Email"
-              className="input"
-            />
-            <input
-              name="deliveryAddressLine1"
-              value={formData.deliveryAddressLine1 || ""}
-              onChange={handleChange}
-              placeholder="Address Line 1"
-              className="input"
-            />
-            <input
-              name="deliveryAddressLine2"
-              value={formData.deliveryAddressLine2 || ""}
-              onChange={handleChange}
-              placeholder="Address Line 2"
-              className="input"
-            />
-            <input
-              name="deliveryCity"
-              value={formData.deliveryCity || ""}
-              onChange={handleChange}
-              placeholder="City"
-              className="input"
-            />
-            <input
-              name="deliveryState"
-              value={formData.deliveryState || ""}
-              onChange={handleChange}
-              placeholder="State"
-              className="input"
-            />
-            <input
-              name="deliveryPostalCode"
-              value={formData.deliveryPostalCode || ""}
-              onChange={handleChange}
-              placeholder="Postal Code"
-              className="input"
-            />
-            <input
-              name="deliveryCountryCode"
-              value={formData.deliveryCountryCode || ""}
-              onChange={handleChange}
-              placeholder="Country Code"
-              className="input"
-            />
+            {renderInput({
+              name: "deliveryFirstName",
+              value: formData.deliveryFirstName || "",
+              onChange: handleChange,
+              placeholder: "First Name",
+            })}
+            {renderInput({
+              name: "deliveryMiddleName",
+              value: formData.deliveryMiddleName || "",
+              onChange: handleChange,
+              placeholder: "Middle Name",
+            })}
+            {renderInput({
+              name: "deliveryLastName",
+              value: formData.deliveryLastName || "",
+              onChange: handleChange,
+              placeholder: "Last Name",
+            })}
+            {renderInput({
+              name: "deliveryPhone",
+              value: formData.deliveryPhone || "",
+              onChange: handleChange,
+              placeholder: "Phone",
+            })}
+            {renderInput({
+              name: "deliveryEmail",
+              value: formData.deliveryEmail || "",
+              onChange: handleChange,
+              placeholder: "Email",
+            })}
+            {renderInput({
+              name: "deliveryAddressLine1",
+              value: formData.deliveryAddressLine1 || "",
+              onChange: handleChange,
+              placeholder: "Address Line 1",
+            })}
+            {renderInput({
+              name: "deliveryAddressLine2",
+              value: formData.deliveryAddressLine2 || "",
+              onChange: handleChange,
+              placeholder: "Address Line 2",
+            })}
+            {renderInput({
+              name: "deliveryCity",
+              value: formData.deliveryCity || "",
+              onChange: handleChange,
+              placeholder: "City",
+            })}
+            {renderInput({
+              name: "deliveryState",
+              value: formData.deliveryState || "",
+              onChange: handleChange,
+              placeholder: "State",
+            })}
+            {renderInput({
+              name: "deliveryPostalCode",
+              value: formData.deliveryPostalCode || "",
+              onChange: handleChange,
+              placeholder: "Postal Code",
+            })}
+            {renderInput({
+              name: "deliveryCountryCode",
+              value: formData.deliveryCountryCode || "",
+              onChange: handleChange,
+              placeholder: "Country Code",
+            })}
           </div>
         </fieldset>
 
@@ -306,7 +273,7 @@ const ProfileSection = ({ user, refreshUser }) => {
             className={`px-6 py-2 font-semibold rounded-md text-white transition duration-200 ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-black hover:bg-gray-800"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "Saving..." : "Save Changes"}
@@ -315,7 +282,7 @@ const ProfileSection = ({ user, refreshUser }) => {
           {message && (
             <span
               className={`text-sm font-medium ${
-                message.startsWith("✅") ? "text-green-600" : "text-red-500"
+                message.startsWith("✅") ? "text-green-500" : "text-red-500"
               }`}
             >
               {message}
