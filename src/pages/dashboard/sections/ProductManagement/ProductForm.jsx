@@ -212,7 +212,6 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       {/* Images */}
       <div>
-        <Label>Upload Images</Label>
         <div>
           <Label>Upload Images</Label>
           <div className="relative w-fit">
