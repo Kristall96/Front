@@ -72,10 +72,12 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     } catch (err) {
       const res = err?.response?.data;
 
+      // Field-specific errors
       if (res?.errors && typeof res.errors === "object") {
         setErrors(res.errors);
       }
 
+      // General error fallback
       const fallback =
         typeof res?.error === "string"
           ? res.error
@@ -83,7 +85,10 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           ? res.error.message
           : typeof err?.message === "string"
           ? err.message
+          : typeof res?.error === "object" && Object.keys(res.error).length > 0
+          ? JSON.stringify(res.error)
           : "Something went wrong.";
+
       setGeneralError(fallback);
     }
   };
@@ -102,7 +107,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         🧾 Product Details
       </h2>
 
-      {typeof generalError === "string" && generalError && (
+      {generalError && (
         <div className="bg-red-600 text-white px-4 py-2 rounded shadow">
           {generalError}
         </div>
