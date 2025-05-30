@@ -35,9 +35,9 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
   const fetchMeta = async () => {
     try {
       const [brandsRes, catsRes, variantsRes] = await Promise.all([
-        secureAxios.get("/admin/products/brands"),
-        secureAxios.get("/admin/products/categories"),
-        secureAxios.get("/admin/products/variants"),
+        secureAxios.get("/admin/brands"),
+        secureAxios.get("/admin/categories"),
+        secureAxios.get("/admin/variants"),
       ]);
       setBrands(brandsRes.data);
       setCategories(catsRes.data);
