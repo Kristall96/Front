@@ -8,6 +8,19 @@ const generateSlug = (text) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
+const IconButton = ({ label, icon, onClick, color = "gray" }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-2 text-sm px-3 py-1 rounded-md 
+      ${color === "red" ? "bg-red-600 hover:bg-red-700" : ""}
+      ${color === "blue" ? "bg-blue-600 hover:bg-blue-700" : ""}
+      ${color === "gray" ? "bg-gray-700 hover:bg-gray-600" : ""}
+      text-white transition`}
+  >
+    {icon} {label}
+  </button>
+);
+
 const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
@@ -103,15 +116,14 @@ const CategoryManager = () => {
           value={newCategory}
           placeholder="New category name"
           onChange={(e) => setNewCategory(e.target.value)}
-          className="w-full p-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button
+        <IconButton
+          label={loading ? "Adding..." : "Add"}
+          icon={<span className="text-lg">➕</span>}
           onClick={handleCreate}
-          disabled={loading}
-          className="px-4 py-2 rounded-md bg-[#2563eb] text-white hover:bg-blue-600 disabled:opacity-50 transition"
-        >
-          {loading ? "Adding..." : "+ Add"}
-        </button>
+          color="blue"
+        />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -141,19 +153,18 @@ const CategoryManager = () => {
             ) : (
               <>
                 <p className="font-medium">{cat.name}</p>
-                <div className="flex gap-3">
-                  <button
+                <div className="flex gap-2">
+                  <IconButton
+                    label="Edit"
+                    icon={<span className="text-sm">✏️</span>}
                     onClick={() => setEditingCategory(cat._id)}
-                    className="text-sm text-blue-400 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
+                  />
+                  <IconButton
+                    label="Delete"
+                    icon={<span className="text-sm">🗑️</span>}
                     onClick={() => handleDelete(cat._id)}
-                    className="text-sm text-red-500 hover:underline"
-                  >
-                    Delete
-                  </button>
+                    color="red"
+                  />
                 </div>
               </>
             )}
@@ -169,9 +180,10 @@ const CategoryManager = () => {
                 <span className="text-sm text-gray-200">{sub.name}</span>
                 <button
                   onClick={() => handleDeleteSub(cat._id, sub.slug)}
-                  className="text-xs text-red-400 hover:text-red-300"
+                  className="text-xs text-red-500 hover:text-red-300"
+                  title="Delete subcategory"
                 >
-                  ✕
+                  🗑️
                 </button>
               </div>
             ))}
@@ -198,17 +210,16 @@ const AddSubForm = ({ onAdd }) => {
             setName("");
           }
         }}
-        className="w-full p-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none"
+        className="w-full px-3 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none"
       />
-      <button
+      <IconButton
+        label="Add"
+        icon={<span className="text-sm">➕</span>}
         onClick={() => {
           onAdd(name);
           setName("");
         }}
-        className="px-3 py-1 rounded-md bg-[#374151] hover:bg-[#4b5563] text-white transition"
-      >
-        Add
-      </button>
+      />
     </div>
   );
 };
