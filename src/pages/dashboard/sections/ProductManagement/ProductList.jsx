@@ -6,13 +6,15 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const fetchProducts = async () => {
     try {
       const res = await secureAxios.get("/admin/products");
       setProducts(res.data);
     } catch (err) {
-      console.error("Failed to fetch products", err.response?.data?.message);
+      console.error("Failed to fetch products", err.response?.data);
     }
   };
 
@@ -27,6 +29,8 @@ const ProductList = () => {
   };
 
   const handleFormSubmit = async (data) => {
+    setError("");
+    setFieldErrors({});
     try {
       if (editingProduct) {
         await secureAxios.put(`/admin/products/${editingProduct._id}`, data);
@@ -36,7 +40,10 @@ const ProductList = () => {
       setShowForm(false);
       fetchProducts();
     } catch (err) {
-      console.error("Save failed", err.response?.data?.message);
+      const res = err.response?.data;
+      setError(res?.error || "Failed to save product.");
+      setFieldErrors(res?.details || {});
+      console.error("Save failed", res);
     }
   };
 
@@ -47,7 +54,7 @@ const ProductList = () => {
       await secureAxios.delete(`/admin/products/${id}`);
       fetchProducts();
     } catch (err) {
-      console.error("Delete failed", err.response?.data?.message);
+      console.error("Delete failed", err.response?.data);
     }
   };
 
@@ -58,7 +65,7 @@ const ProductList = () => {
   return (
     <div className="bg-[#131a25] text-white p-6 rounded-xl shadow-md border border-gray-700">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">🧾 All Products</h2>
+        <h2 className="text-2xl font-bold">📟 All Products</h2>
         <button
           onClick={handleCreate}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
@@ -69,9 +76,15 @@ const ProductList = () => {
 
       {showForm && (
         <div className="mb-10">
+          {error && (
+            <div className="mb-4 text-red-400 bg-red-900 p-3 rounded-md">
+              {error}
+            </div>
+          )}
           <ProductForm
             initialData={editingProduct}
             onSubmit={handleFormSubmit}
+            fieldErrors={fieldErrors}
           />
         </div>
       )}

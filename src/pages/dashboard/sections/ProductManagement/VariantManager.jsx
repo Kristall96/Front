@@ -8,6 +8,7 @@ const VariantManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldError, setFieldError] = useState("");
 
   useEffect(() => {
     fetchVariants();
@@ -33,6 +34,7 @@ const VariantManager = () => {
     if (!newName.trim()) return;
     setLoading(true);
     setError("");
+    setFieldError("");
 
     const slug = generateSlug(newName);
 
@@ -44,14 +46,20 @@ const VariantManager = () => {
       setNewName("");
       fetchVariants();
     } catch (err) {
-      console.error("Failed to add variant category:", err);
-      setError(err?.response?.data?.message || "Add failed");
+      const res = err?.response?.data;
+      setError(res?.error || "Add failed");
+      setFieldError(res?.details?.name || "");
+      console.error("Failed to add variant category:", res);
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpdate = async (id, name) => {
+    setLoading(true);
+    setError("");
+    setFieldError("");
+
     try {
       await secureAxios.put(`/admin/variant-categories/${id}`, {
         name,
@@ -60,12 +68,17 @@ const VariantManager = () => {
       setEditingId(null);
       fetchVariants();
     } catch (err) {
-      console.error("Update failed:", err);
+      const res = err?.response?.data;
+      setError(res?.error || "Update failed");
+      setFieldError(res?.details?.name || "");
+      console.error("Update failed:", res);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this variant category?")) return;
+    if (!window.confirm("Delete this variant category?")) return;
     try {
       await secureAxios.delete(`/admin/variant-categories/${id}`);
       fetchVariants();
@@ -85,7 +98,9 @@ const VariantManager = () => {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="e.g. Size, Color"
-          className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            fieldError ? "border-red-500" : "border-gray-600"
+          }`}
         />
         <button
           onClick={handleAdd}
@@ -96,7 +111,8 @@ const VariantManager = () => {
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+      {fieldError && <p className="text-sm text-red-400 mt-1">{fieldError}</p>}
 
       {variants.map((variant) => (
         <div
@@ -111,7 +127,9 @@ const VariantManager = () => {
                   handleUpdate(variant._id, e.target.value);
                 }
               }}
-              className="w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
+              className={`w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border focus:outline-none mr-4 ${
+                fieldError ? "border-red-500" : "border-gray-600"
+              }`}
             />
           ) : (
             <span className="font-medium text-lg">{variant.name}</span>

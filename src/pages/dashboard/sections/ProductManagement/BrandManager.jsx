@@ -6,7 +6,9 @@ const BrandManager = () => {
   const [brands, setBrands] = useState([]);
   const [newBrand, setNewBrand] = useState("");
   const [editingBrandId, setEditingBrandId] = useState(null);
+  const [editingName, setEditingName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchBrands();
@@ -18,30 +20,39 @@ const BrandManager = () => {
       setBrands(res.data);
     } catch (err) {
       console.error("Fetch error:", err);
+      setError("Failed to load brands.");
     }
   };
 
   const handleCreate = async () => {
     if (!newBrand.trim()) return;
     setLoading(true);
+    setError("");
+
     try {
-      await secureAxios.post("/admin/brands", { name: newBrand });
+      await secureAxios.post("/admin/brands", { name: newBrand.trim() });
       setNewBrand("");
       fetchBrands();
     } catch (err) {
       console.error("Create error:", err);
+      setError(err?.response?.data?.message || "Create failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdate = async (id, name) => {
+  const handleUpdate = async () => {
+    if (!editingName.trim()) return;
     try {
-      await secureAxios.put(`/admin/brands/${id}`, { name });
+      await secureAxios.put(`/admin/brands/${editingBrandId}`, {
+        name: editingName.trim(),
+      });
       setEditingBrandId(null);
+      setEditingName("");
       fetchBrands();
     } catch (err) {
       console.error("Update error:", err);
+      setError("Update failed");
     }
   };
 
@@ -52,6 +63,7 @@ const BrandManager = () => {
       fetchBrands();
     } catch (err) {
       console.error("Delete error:", err);
+      setError("Delete failed");
     }
   };
 
@@ -67,6 +79,7 @@ const BrandManager = () => {
           value={newBrand}
           onChange={(e) => setNewBrand(e.target.value)}
           placeholder="New brand name"
+          disabled={loading}
           className="w-full p-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
@@ -77,6 +90,8 @@ const BrandManager = () => {
           <Plus size={16} /> Add
         </button>
       </div>
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
       {/* Brand List */}
       {brands.map((brand) => (
         <div
@@ -85,11 +100,10 @@ const BrandManager = () => {
         >
           {editingBrandId === brand._id ? (
             <input
-              defaultValue={brand.name}
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleUpdate(brand._id, e.target.value);
-                }
+                if (e.key === "Enter") handleUpdate();
               }}
               className="w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
             />
@@ -99,26 +113,42 @@ const BrandManager = () => {
 
           <div className="flex gap-3 ml-4">
             {editingBrandId === brand._id ? (
-              <button
-                onClick={() => setEditingBrandId(null)}
-                className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
-              >
-                Cancel
-              </button>
+              <>
+                <button
+                  onClick={handleUpdate}
+                  className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingBrandId(null);
+                    setEditingName("");
+                  }}
+                  className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
+                >
+                  Cancel
+                </button>
+              </>
             ) : (
-              <button
-                onClick={() => setEditingBrandId(brand._id)}
-                className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
-              >
-                Edit
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setEditingBrandId(brand._id);
+                    setEditingName(brand.name);
+                  }}
+                  className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(brand._id)}
+                  className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </>
             )}
-            <button
-              onClick={() => handleDelete(brand._id)}
-              className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-            >
-              Delete
-            </button>
           </div>
         </div>
       ))}

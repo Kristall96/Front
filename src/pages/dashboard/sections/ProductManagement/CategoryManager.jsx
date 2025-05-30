@@ -8,13 +8,15 @@ const generateSlug = (text) =>
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 
-const IconButton = ({ label, icon, onClick, color = "gray" }) => (
+const IconButton = ({ label, icon, onClick, color = "gray", disabled }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 text-sm px-3 py-1 rounded-md 
+    disabled={disabled}
+    className={`flex items-center gap-2 text-sm px-3 py-1 rounded-md
       ${color === "red" ? "bg-red-600 hover:bg-red-700" : ""}
       ${color === "blue" ? "bg-blue-600 hover:bg-blue-700" : ""}
       ${color === "gray" ? "bg-gray-700 hover:bg-gray-600" : ""}
+      ${disabled ? "opacity-50 cursor-not-allowed" : ""}
       text-white transition`}
   >
     {icon} {label}
@@ -37,7 +39,7 @@ const CategoryManager = () => {
       const res = await secureAxios.get("/admin/categories");
       setCategories(res.data);
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Failed to fetch categories", err);
     }
   };
 
@@ -50,46 +52,56 @@ const CategoryManager = () => {
     try {
       await secureAxios.post("/admin/categories", { name: newCategory, slug });
       setNewCategory("");
-      fetchCategories();
+      await fetchCategories();
     } catch (err) {
-      setError(err?.response?.data?.message || "Create failed");
+      setError(err?.response?.data?.message || "Failed to create category.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = async (id, newName) => {
+    if (!newName.trim()) return;
+    const slug = generateSlug(newName);
+
     try {
-      const slug = generateSlug(newName);
-      await secureAxios.put(`/admin/categories/${id}`, { name: newName, slug });
+      await secureAxios.put(`/admin/categories/${id}`, {
+        name: newName,
+        slug,
+      });
       setEditingCategory(null);
-      fetchCategories();
+      await fetchCategories();
     } catch (err) {
-      console.error("Edit error", err);
+      console.error("Failed to edit category", err);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this category?")) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this category?"
+    );
+    if (!confirmed) return;
+
     try {
       await secureAxios.delete(`/admin/categories/${id}`);
-      fetchCategories();
+      await fetchCategories();
     } catch (err) {
-      console.error("Delete error", err);
+      console.error("Failed to delete category", err);
     }
   };
 
   const handleAddSub = async (catId, subName) => {
     if (!subName.trim()) return;
     const slug = generateSlug(subName);
+
     try {
       await secureAxios.post(`/admin/categories/${catId}/subcategories`, {
         name: subName,
         slug,
       });
-      fetchCategories();
+      await fetchCategories();
     } catch (err) {
-      console.error("Add sub error", err);
+      console.error("Failed to add subcategory", err);
     }
   };
 
@@ -98,9 +110,9 @@ const CategoryManager = () => {
       await secureAxios.delete(
         `/admin/categories/${catId}/subcategories/${subSlug}`
       );
-      fetchCategories();
+      await fetchCategories();
     } catch (err) {
-      console.error("Delete sub error", err);
+      console.error("Failed to delete subcategory", err);
     }
   };
 
@@ -110,12 +122,12 @@ const CategoryManager = () => {
         📁 Manage Categories
       </h2>
 
-      {/* Add new category */}
+      {/* Add New Category */}
       <div className="flex gap-2">
         <input
           value={newCategory}
-          placeholder="New category name"
           onChange={(e) => setNewCategory(e.target.value)}
+          placeholder="New category name"
           className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <IconButton
@@ -123,11 +135,12 @@ const CategoryManager = () => {
           icon={<span className="text-lg">➕</span>}
           onClick={handleCreate}
           color="blue"
+          disabled={loading}
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {/* Category list */}
+      {/* Category List */}
       {categories.map((cat) => (
         <div
           key={cat._id}
@@ -138,9 +151,11 @@ const CategoryManager = () => {
               <div className="flex gap-2 w-full">
                 <input
                   defaultValue={cat.name}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && handleEdit(cat._id, e.target.value)
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleEdit(cat._id, e.target.value);
+                    }
+                  }}
                   className="w-full p-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none"
                 />
                 <button
@@ -197,6 +212,14 @@ const CategoryManager = () => {
 
 const AddSubForm = ({ onAdd }) => {
   const [name, setName] = useState("");
+
+  const handleAdd = () => {
+    if (name.trim()) {
+      onAdd(name.trim());
+      setName("");
+    }
+  };
+
   return (
     <div className="flex gap-2 mt-2">
       <input
@@ -204,21 +227,13 @@ const AddSubForm = ({ onAdd }) => {
         value={name}
         placeholder="Add subcategory"
         onChange={(e) => setName(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            onAdd(name);
-            setName("");
-          }
-        }}
+        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
         className="w-full px-3 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none"
       />
       <IconButton
         label="Add"
         icon={<span className="text-sm">➕</span>}
-        onClick={() => {
-          onAdd(name);
-          setName("");
-        }}
+        onClick={handleAdd}
       />
     </div>
   );
