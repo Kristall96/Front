@@ -75,15 +75,15 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     } catch (err) {
       const res = err?.response?.data;
 
-      // Prioritize detailed validation errors
       if (res?.details && typeof res.details === "object") {
         setErrors(res.details);
       }
 
-      // Fallback general error message
       const fallback =
         typeof res?.error === "string"
           ? res.error
+          : typeof res?.message === "string"
+          ? res.message
           : typeof err?.message === "string"
           ? err.message
           : "Something went wrong while submitting the form.";
@@ -129,6 +129,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         setForm={setForm}
         uploading={uploading}
         setUploading={setUploading}
+        renderError={renderError}
       />
 
       <ProductVariants
