@@ -7,16 +7,6 @@ const Label = ({ children }) => (
   </label>
 );
 
-const Input = ({ label, ...props }) => (
-  <div>
-    <Label>{label}</Label>
-    <input
-      {...props}
-      className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  </div>
-);
-
 const ProductForm = ({ onSubmit, initialData = {} }) => {
   const [form, setForm] = useState({
     title: "",
@@ -57,7 +47,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       setCategories(catsRes.data);
       setVariantCategories(variantsRes.data);
     } catch (err) {
-      console.error("Metadata error", err);
+      console.error("Form metadata error", err);
     }
   };
 
@@ -75,7 +65,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         thumbnail: prev.thumbnail || uploaded[0],
       }));
     } catch (err) {
-      console.error("Upload error", err);
+      console.error("Upload failed", err);
     } finally {
       setUploading(false);
     }
@@ -83,15 +73,19 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const cleanedForm = {
       ...form,
       brand: form.brand?._id || form.brand,
       category: form.category?._id || form.category,
-      variants: form.variants.map((v) => ({
-        variantCategory: v.variantCategory?._id || v.variantCategory,
-        value: v.value,
-      })),
+      variants: form.variants
+        .filter((v) => v.variantCategory && v.value)
+        .map((v) => ({
+          variantCategory: v.variantCategory?._id || v.variantCategory,
+          value: v.value,
+        })),
     };
+
     onSubmit(cleanedForm);
   };
 
@@ -100,28 +94,34 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       onSubmit={handleSubmit}
       className="bg-gray-900 p-8 rounded-xl shadow-lg border border-gray-700 space-y-8 text-white"
     >
-      <h2 className="text-2xl font-semibold border-b border-gray-700 pb-2">
+      <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">
         🧾 Product Details
       </h2>
 
       {/* Title & Description */}
-      <Input
-        label="Title *"
-        type="text"
-        required
-        value={form.title}
-        placeholder="E.g. Classic White T-Shirt"
-        onChange={(e) => setForm({ ...form, title: e.target.value })}
-      />
-      <div>
-        <Label>Description</Label>
-        <textarea
-          rows="4"
-          className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
-          value={form.description}
-          placeholder="Full product description..."
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
+      <div className="space-y-4">
+        <div>
+          <Label>Title *</Label>
+          <input
+            required
+            type="text"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={form.title}
+            placeholder="E.g. Classic White T-Shirt"
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <Label>Description</Label>
+          <textarea
+            rows="4"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
+            value={form.description}
+            placeholder="Full product description..."
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
       </div>
 
       {/* Brand & Category */}
@@ -129,13 +129,12 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Brand *</Label>
           <select
-            required
-            value={form.brand?._id || form.brand}
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={form.brand?._id || form.brand || ""}
             onChange={(e) => {
               const selected = brands.find((b) => b._id === e.target.value);
               setForm({ ...form, brand: selected });
             }}
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
           >
             <option value="">Select Brand</option>
             {brands.map((b) => (
@@ -149,8 +148,8 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Category *</Label>
           <select
-            required
-            value={form.category?._id || form.category}
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={form.category?._id || form.category || ""}
             onChange={(e) => {
               const selected = categories.find((c) => c._id === e.target.value);
               setForm({
@@ -160,7 +159,6 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               });
               setSubcategories(selected?.subcategories || []);
             }}
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
           >
             <option value="">Select Category</option>
             {categories.map((c) => (
@@ -177,9 +175,9 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Subcategory</Label>
           <select
+            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.subcategory}
             onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-600"
           >
             <option value="">Select Subcategory</option>
             {subcategories.map((s) => (
@@ -193,51 +191,68 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       {/* Pricing & Stock */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {[
-          ["Base Price *", "basePrice"],
-          ["Sale Price", "salePrice"],
-          ["Discount (%)", "discountPercentage"],
-          ["Stock *", "stock"],
-        ].map(([label, key]) => (
-          <Input
-            key={key}
-            label={label}
-            type="number"
-            value={form[key] || ""}
-            onChange={(e) => setForm({ ...form, [key]: +e.target.value || 0 })}
-          />
-        ))}
+        {["basePrice", "salePrice", "discountPercentage", "stock"].map(
+          (key) => (
+            <div key={key}>
+              <Label>
+                {key === "basePrice"
+                  ? "Base Price *"
+                  : key === "salePrice"
+                  ? "Sale Price"
+                  : key === "discountPercentage"
+                  ? "Discount (%)"
+                  : "Stock *"}
+              </Label>
+              <input
+                type="number"
+                required={key === "basePrice" || key === "stock"}
+                className="no-spinner w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={form[key] || ""}
+                onChange={(e) =>
+                  setForm({ ...form, [key]: +e.target.value || 0 })
+                }
+              />
+            </div>
+          )
+        )}
       </div>
 
-      {/* Image Upload */}
+      {/* Images */}
       <div>
-        <Label>Upload Images</Label>
-        <label
-          htmlFor="fileUpload"
-          className="cursor-pointer px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white inline-block"
-        >
-          📁 Browse Files
-        </label>
-        <input
-          type="file"
-          id="fileUpload"
-          multiple
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-        {uploading && (
-          <p className="text-sm text-gray-400 mt-1">Uploading...</p>
-        )}
+        <div>
+          <Label>Upload Images</Label>
+          <div className="relative w-fit">
+            <input
+              type="file"
+              id="fileUpload"
+              multiple
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <label
+              htmlFor="fileUpload"
+              className="cursor-pointer px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white inline-block"
+            >
+              📁 Browse Files
+            </label>
+          </div>
+          {uploading && (
+            <p className="text-sm text-gray-400 mt-1">Uploading...</p>
+          )}
+        </div>
+
         <div className="flex gap-2 flex-wrap mt-3">
           {form.images.map((img) => (
             <div key={img} className="relative border rounded shadow-sm">
               <img src={img} className="w-24 h-24 object-cover rounded" />
               <button
                 type="button"
-                onClick={() => setForm({ ...form, thumbnail: img })}
                 className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full ${
-                  form.thumbnail === img ? "bg-green-600" : "bg-gray-600"
-                } text-white`}
+                  form.thumbnail === img
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-600 text-white"
+                }`}
+                onClick={() => setForm({ ...form, thumbnail: img })}
               >
                 {form.thumbnail === img ? "✓" : "Set"}
               </button>
@@ -267,38 +282,51 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       <div>
         <Label>Variants</Label>
         {form.variants.map((v, i) => (
-          <div key={i} className="flex gap-3 mb-4 flex-wrap md:flex-nowrap">
-            <select
-              value={v.variantCategory?._id || v.variantCategory || ""}
-              onChange={(e) => {
-                const selected = variantCategories.find(
-                  (vc) => vc._id === e.target.value
-                );
-                const updated = [...form.variants];
-                updated[i].variantCategory = selected;
-                setForm({ ...form, variants: updated });
-              }}
-              className="flex-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
-            >
-              <option value="">Select Variant Category</option>
-              {variantCategories.map((vc) => (
-                <option key={vc._id} value={vc._id}>
-                  {vc.name}
-                </option>
-              ))}
-            </select>
+          <div
+            key={i}
+            className="flex gap-3 items-start md:items-end mb-4 flex-wrap md:flex-nowrap"
+          >
+            <div className="flex-1">
+              <Label className="text-xs">Category</Label>
+              <select
+                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                value={v.variantCategory?._id || v.variantCategory || ""}
+                onChange={(e) => {
+                  const selected = variantCategories.find(
+                    (vc) => vc._id === e.target.value
+                  );
+                  const updated = [...form.variants];
+                  updated[i].variantCategory = selected;
+                  setForm({ ...form, variants: updated });
+                }}
+              >
+                <option value="">Select Category</option>
+                {variantCategories.map(
+                  (vc) =>
+                    vc._id &&
+                    vc.name && (
+                      <option key={vc._id} value={vc._id}>
+                        {vc.name}
+                      </option>
+                    )
+                )}
+              </select>
+            </div>
 
-            <input
-              type="text"
-              value={v.value}
-              onChange={(e) => {
-                const updated = [...form.variants];
-                updated[i].value = e.target.value;
-                setForm({ ...form, variants: updated });
-              }}
-              placeholder="e.g. Red, XL"
-              className="flex-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
-            />
+            <div className="flex-1">
+              <Label className="text-xs">Value</Label>
+              <input
+                type="text"
+                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                placeholder="e.g. Red, XL"
+                value={v.value}
+                onChange={(e) => {
+                  const updated = [...form.variants];
+                  updated[i].value = e.target.value;
+                  setForm({ ...form, variants: updated });
+                }}
+              />
+            </div>
 
             <button
               type="button"
@@ -307,21 +335,28 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                 updated.splice(i, 1);
                 setForm({ ...form, variants: updated });
               }}
-              className="px-3 bg-red-600 text-white rounded"
+              className="h-9 mt-6 px-3 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
             >
               ✕
             </button>
           </div>
         ))}
+
         <button
           type="button"
-          onClick={() =>
-            setForm({
-              ...form,
-              variants: [...form.variants, { variantCategory: "", value: "" }],
-            })
-          }
-          className="mt-2 px-4 py-2 rounded border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white"
+          onClick={() => {
+            const last = form.variants[form.variants.length - 1];
+            if (!last || (last.variantCategory && last.value)) {
+              setForm({
+                ...form,
+                variants: [
+                  ...form.variants,
+                  { variantCategory: "", value: "" },
+                ],
+              });
+            }
+          }}
+          className="mt-2 inline-block px-4 py-2 rounded border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition"
         >
           + Add Variant
         </button>
@@ -351,7 +386,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       <button
         type="submit"
-        className="w-full mt-6 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+        className="w-full mt-6 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
       >
         {initialData ? "Update Product" : "Create Product"}
       </button>
