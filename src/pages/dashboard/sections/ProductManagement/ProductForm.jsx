@@ -256,50 +256,62 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       <div>
         <Label>Variants</Label>
         {form.variants.map((v, i) => (
-          <div key={i} className="flex gap-2 mb-2 items-center">
-            <select
-              className="select select-sm bg-gray-800 text-white border-gray-600"
-              value={v.variantCategory?._id || v.variantCategory || ""}
-              onChange={(e) => {
-                const selected = variantCategories.find(
-                  (vc) => vc._id === e.target.value
-                );
-                const updated = [...form.variants];
-                updated[i].variantCategory = selected;
-                setForm({ ...form, variants: updated });
-              }}
-            >
-              <option value="">Select Category</option>
-              {variantCategories.map((vc) => (
-                <option key={vc._id} value={vc._id}>
-                  {vc.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="Value (e.g. Red, XL)"
-              className="input input-sm bg-gray-800 text-white border-gray-600"
-              value={v.value}
-              onChange={(e) => {
-                const updated = [...form.variants];
-                updated[i].value = e.target.value;
-                setForm({ ...form, variants: updated });
-              }}
-            />
+          <div
+            key={i}
+            className="flex flex-wrap md:flex-nowrap gap-2 mb-2 items-center"
+          >
+            <div className="flex-1">
+              <Label className="text-xs">Category</Label>
+              <select
+                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                value={v.variantCategory?._id || v.variantCategory || ""}
+                onChange={(e) => {
+                  const selected = variantCategories.find(
+                    (vc) => vc._id === e.target.value
+                  );
+                  const updated = [...form.variants];
+                  updated[i].variantCategory = selected;
+                  setForm({ ...form, variants: updated });
+                }}
+              >
+                <option value="">Select Category</option>
+                {variantCategories.map((vc) => (
+                  <option key={vc._id} value={vc._id}>
+                    {vc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex-1">
+              <Label className="text-xs">Value</Label>
+              <input
+                type="text"
+                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                placeholder="e.g. Red, XL"
+                value={v.value}
+                onChange={(e) => {
+                  const updated = [...form.variants];
+                  updated[i].value = e.target.value;
+                  setForm({ ...form, variants: updated });
+                }}
+              />
+            </div>
+
             <button
               type="button"
-              className="btn btn-sm bg-red-600 text-white"
               onClick={() => {
                 const updated = [...form.variants];
                 updated.splice(i, 1);
                 setForm({ ...form, variants: updated });
               }}
+              className="px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
             >
               ✕
             </button>
           </div>
         ))}
+
         <button
           type="button"
           onClick={() =>
@@ -308,7 +320,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               variants: [...form.variants, { variantCategory: "", value: "" }],
             })
           }
-          className="btn btn-sm bg-blue-600 text-white mt-2"
+          className="mt-2 inline-block px-4 py-2 rounded border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition"
         >
           + Add Variant
         </button>
@@ -338,7 +350,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       <button
         type="submit"
-        className="btn bg-indigo-600 hover:bg-indigo-700 text-white w-full mt-6"
+        className="w-full mt-6 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
       >
         {initialData ? "Update Product" : "Create Product"}
       </button>
