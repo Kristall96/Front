@@ -199,7 +199,8 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <Label>{label}</Label>
             <input
               type="number"
-              className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              inputMode="decimal"
+              className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               value={form[key] || ""}
               onChange={(e) =>
                 setForm({ ...form, [key]: +e.target.value || 0 })
@@ -212,7 +213,28 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       {/* Images */}
       <div>
         <Label>Upload Images</Label>
-        <input type="file" multiple onChange={handleImageUpload} />
+        <div>
+          <Label>Upload Images</Label>
+          <div className="relative w-fit">
+            <input
+              type="file"
+              id="fileUpload"
+              multiple
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <label
+              htmlFor="fileUpload"
+              className="cursor-pointer px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white inline-block"
+            >
+              📁 Browse Files
+            </label>
+          </div>
+          {uploading && (
+            <p className="text-sm text-gray-400 mt-1">Uploading...</p>
+          )}
+        </div>
+
         {uploading && (
           <p className="text-sm text-gray-400 mt-1">Uploading...</p>
         )}
