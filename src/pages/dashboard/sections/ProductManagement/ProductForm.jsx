@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
 
 const Label = ({ children }) => (
-  <label className="block text-sm font-medium text-gray-700 mb-1">
+  <label className="block text-sm font-medium text-gray-300 mb-1">
     {children}
   </label>
 );
@@ -79,9 +79,9 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-8 rounded-xl shadow-lg border space-y-8"
+      className="bg-gray-900 p-8 rounded-xl shadow-lg border border-gray-700 space-y-8 text-white"
     >
-      <h2 className="text-2xl font-semibold text-indigo-800 border-b pb-2">
+      <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">
         🧾 Product Details
       </h2>
 
@@ -92,7 +92,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <input
             required
             type="text"
-            className="input input-bordered w-full"
+            className="input input-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.title}
             placeholder="E.g. Classic White T-Shirt"
             onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -102,7 +102,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <Label>Description</Label>
           <textarea
             rows="4"
-            className="textarea textarea-bordered w-full"
+            className="textarea textarea-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.description}
             placeholder="Full product description..."
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -115,7 +115,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Brand *</Label>
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.brand}
             onChange={(e) => setForm({ ...form, brand: e.target.value })}
           >
@@ -131,7 +131,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Category *</Label>
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.category}
             onChange={(e) => {
               const cat = categories.find((c) => c._id === e.target.value);
@@ -154,7 +154,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Subcategory</Label>
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
             value={form.subcategory}
             onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
           >
@@ -170,44 +170,24 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       {/* Pricing & Stock */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div>
-          <Label>Base Price *</Label>
-          <input
-            type="number"
-            className="input input-bordered w-full"
-            value={form.basePrice}
-            onChange={(e) => setForm({ ...form, basePrice: +e.target.value })}
-          />
-        </div>
-        <div>
-          <Label>Sale Price</Label>
-          <input
-            type="number"
-            className="input input-bordered w-full"
-            value={form.salePrice || ""}
-            onChange={(e) => setForm({ ...form, salePrice: +e.target.value })}
-          />
-        </div>
-        <div>
-          <Label>Discount (%)</Label>
-          <input
-            type="number"
-            className="input input-bordered w-full"
-            value={form.discountPercentage}
-            onChange={(e) =>
-              setForm({ ...form, discountPercentage: +e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <Label>Stock *</Label>
-          <input
-            type="number"
-            className="input input-bordered w-full"
-            value={form.stock}
-            onChange={(e) => setForm({ ...form, stock: +e.target.value })}
-          />
-        </div>
+        {[
+          { label: "Base Price *", key: "basePrice" },
+          { label: "Sale Price", key: "salePrice" },
+          { label: "Discount (%)", key: "discountPercentage" },
+          { label: "Stock *", key: "stock" },
+        ].map(({ label, key }) => (
+          <div key={key}>
+            <Label>{label}</Label>
+            <input
+              type="number"
+              className="input input-bordered w-full bg-gray-800 text-white border-gray-600"
+              value={form[key] || ""}
+              onChange={(e) =>
+                setForm({ ...form, [key]: +e.target.value || 0 })
+              }
+            />
+          </div>
+        ))}
       </div>
 
       {/* Images */}
@@ -215,7 +195,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <Label>Upload Images</Label>
         <input type="file" multiple onChange={handleImageUpload} />
         {uploading && (
-          <p className="text-sm text-gray-500 mt-1">Uploading...</p>
+          <p className="text-sm text-gray-400 mt-1">Uploading...</p>
         )}
         <div className="flex gap-2 flex-wrap mt-3">
           {form.images.map((img) => (
@@ -226,7 +206,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                 className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full ${
                   form.thumbnail === img
                     ? "bg-green-600 text-white"
-                    : "bg-gray-300 text-black"
+                    : "bg-gray-600 text-white"
                 }`}
                 onClick={() => setForm({ ...form, thumbnail: img })}
               >
@@ -260,7 +240,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         {form.variants.map((v, i) => (
           <div key={i} className="flex gap-2 mb-2 items-center">
             <select
-              className="select select-sm"
+              className="select select-sm bg-gray-800 text-white border-gray-600"
               value={v.variantCategory}
               onChange={(e) => {
                 const updated = [...form.variants];
@@ -278,7 +258,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <input
               type="text"
               placeholder="Value (e.g. Red, XL)"
-              className="input input-sm"
+              className="input input-sm bg-gray-800 text-white border-gray-600"
               value={v.value}
               onChange={(e) => {
                 const updated = [...form.variants];
@@ -288,7 +268,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             />
             <button
               type="button"
-              className="btn btn-sm btn-error"
+              className="btn btn-sm bg-red-600 text-white"
               onClick={() => {
                 const updated = [...form.variants];
                 updated.splice(i, 1);
@@ -307,7 +287,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               variants: [...form.variants, { variantCategory: "", value: "" }],
             })
           }
-          className="btn btn-sm mt-2"
+          className="btn btn-sm bg-blue-600 text-white mt-2"
         >
           + Add Variant
         </button>
@@ -315,7 +295,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       {/* Toggles */}
       <div className="flex gap-6 pt-2">
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-gray-200">
           <input
             type="checkbox"
             checked={form.isPublished}
@@ -325,7 +305,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           />
           <span>Published</span>
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-gray-200">
           <input
             type="checkbox"
             checked={form.isFeatured}
@@ -335,7 +315,10 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </label>
       </div>
 
-      <button type="submit" className="btn btn-primary w-full mt-4">
+      <button
+        type="submit"
+        className="btn bg-indigo-600 hover:bg-indigo-700 text-white w-full mt-6"
+      >
         {initialData ? "Update Product" : "Create Product"}
       </button>
     </form>
