@@ -27,7 +27,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       { key: "products", label: "Products", icon: <Package size={18} /> },
       {
         key: "products-management",
-        label: "Products",
+        label: "Products-management",
         icon: <Package size={18} />,
       },
       { key: "users", label: "Manage Users", icon: <Users size={18} /> },
