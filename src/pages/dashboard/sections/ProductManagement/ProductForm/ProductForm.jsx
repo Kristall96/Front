@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import ProductFields from "./ProductFields";
 import ProductSelectors from "./ProductSelectors";
 import ProductImageUploader from "./ProductImageUploader";
 import ProductVariants from "./productVariants";
@@ -75,6 +74,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     } catch (err) {
       const res = err?.response?.data;
 
+      // Show validation errors if provided
       if (res?.details && typeof res.details === "object") {
         setErrors(res.details);
       }
@@ -112,7 +112,50 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </div>
       )}
 
-      <ProductFields form={form} setForm={setForm} renderError={renderError} />
+      {/* Title */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          Title *
+        </label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-600"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        {renderError("title")}
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          Description *
+        </label>
+        <textarea
+          className="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-600"
+          rows={4}
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
+        {renderError("description")}
+      </div>
+
+      {/* Price */}
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-1">
+          Base Price *
+        </label>
+        <input
+          type="number"
+          min="0"
+          className="w-full px-3 py-2 rounded bg-gray-800 text-white border border-gray-600"
+          value={form.basePrice}
+          onChange={(e) =>
+            setForm({ ...form, basePrice: Number(e.target.value) })
+          }
+        />
+        {renderError("basePrice")}
+      </div>
 
       <ProductSelectors
         form={form}
