@@ -68,7 +68,7 @@ const VariantManager = () => {
           className="input input-bordered w-full"
         />
         <button
-          className="btn btn-primary"
+          className="btn text-white bg-blue-600 hover:bg-blue-700"
           onClick={handleAdd}
           disabled={loading}
         >
