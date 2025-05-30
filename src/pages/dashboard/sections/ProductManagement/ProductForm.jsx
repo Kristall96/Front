@@ -1,4 +1,3 @@
-// ✅ CLEAN + USER-FRIENDLY PRODUCT FORM
 import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
 
@@ -80,37 +79,39 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl shadow-md space-y-6"
+      className="bg-white p-8 rounded-xl shadow-lg border space-y-8"
     >
-      <h2 className="text-xl font-semibold text-gray-800">
-        📝 Product Details
+      <h2 className="text-2xl font-semibold text-indigo-800 border-b pb-2">
+        🧾 Product Details
       </h2>
 
       {/* Title & Description */}
-      <div>
-        <Label>Title *</Label>
-        <input
-          required
-          type="text"
-          className="input input-bordered w-full"
-          value={form.title}
-          placeholder="E.g. Classic White T-Shirt"
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
-      </div>
-      <div>
-        <Label>Description</Label>
-        <textarea
-          rows="4"
-          className="textarea textarea-bordered w-full"
-          value={form.description}
-          placeholder="Full product description..."
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
+      <div className="space-y-4">
+        <div>
+          <Label>Title *</Label>
+          <input
+            required
+            type="text"
+            className="input input-bordered w-full"
+            value={form.title}
+            placeholder="E.g. Classic White T-Shirt"
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label>Description</Label>
+          <textarea
+            rows="4"
+            className="textarea textarea-bordered w-full"
+            value={form.description}
+            placeholder="Full product description..."
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
       </div>
 
-      {/* Brand / Category */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Brand & Category */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label>Brand *</Label>
           <select
@@ -148,6 +149,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </div>
       </div>
 
+      {/* Subcategory */}
       {subcategories.length > 0 && (
         <div>
           <Label>Subcategory</Label>
@@ -166,8 +168,8 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </div>
       )}
 
-      {/* Price / Stock */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Pricing & Stock */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div>
           <Label>Base Price *</Label>
           <input
@@ -210,15 +212,15 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
       {/* Images */}
       <div>
-        <Label>Images</Label>
+        <Label>Upload Images</Label>
         <input type="file" multiple onChange={handleImageUpload} />
         {uploading && (
           <p className="text-sm text-gray-500 mt-1">Uploading...</p>
         )}
-        <div className="flex gap-2 flex-wrap mt-2">
+        <div className="flex gap-2 flex-wrap mt-3">
           {form.images.map((img) => (
             <div key={img} className="relative border rounded shadow-sm">
-              <img src={img} className="w-24 h-24 object-cover" />
+              <img src={img} className="w-24 h-24 object-cover rounded" />
               <button
                 type="button"
                 className={`absolute top-1 right-1 text-xs px-2 py-1 rounded-full ${
@@ -312,7 +314,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       </div>
 
       {/* Toggles */}
-      <div className="flex gap-6">
+      <div className="flex gap-6 pt-2">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -333,7 +335,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </label>
       </div>
 
-      <button type="submit" className="btn btn-primary w-full mt-6">
+      <button type="submit" className="btn btn-primary w-full mt-4">
         {initialData ? "Update Product" : "Create Product"}
       </button>
     </form>
