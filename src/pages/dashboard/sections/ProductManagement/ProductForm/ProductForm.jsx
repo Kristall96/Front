@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ProductFields from "./ProductFields";
 import ProductSelectors from "./ProductSelectors";
 import ProductImageUploader from "./ProductImageUploader";
-import ProductVariants from "./productVariants";
+import ProductVariants from "./productVariants"; // fixed casing
 import ToggleOptions from "./ToggleOptions";
 import { fetchProductMeta } from "./ProductMetaLoader";
 
@@ -72,16 +72,18 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     } catch (err) {
       const res = err?.response?.data;
 
-      // Detailed field-level errors (like { title: 'Title is required' })
       if (res?.errors && typeof res.errors === "object") {
         setErrors(res.errors);
       }
 
-      // General error fallback
       const fallback =
         typeof res?.error === "string"
           ? res.error
-          : res?.error?.message || err.message || "Something went wrong.";
+          : typeof res?.error?.message === "string"
+          ? res.error.message
+          : typeof err?.message === "string"
+          ? err.message
+          : "Something went wrong.";
       setGeneralError(fallback);
     }
   };
@@ -107,6 +109,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       )}
 
       <ProductFields form={form} setForm={setForm} renderError={renderError} />
+
       <ProductSelectors
         form={form}
         setForm={setForm}
@@ -116,19 +119,23 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         setSubcategories={setSubcategories}
         renderError={renderError}
       />
+
       <ProductImageUploader
         form={form}
         setForm={setForm}
         uploading={uploading}
         setUploading={setUploading}
       />
+
       <ProductVariants
         form={form}
         setForm={setForm}
         variantCategories={variantCategories}
         renderError={renderError}
       />
+
       <ToggleOptions form={form} setForm={setForm} />
+
       <button
         type="submit"
         className="w-full mt-6 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
