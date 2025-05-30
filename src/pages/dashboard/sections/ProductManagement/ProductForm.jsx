@@ -103,12 +103,13 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           <input
             required
             type="text"
-            className="input input-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.title}
             placeholder="E.g. Classic White T-Shirt"
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
         </div>
+
         <div>
           <Label>Description</Label>
           <textarea
@@ -126,7 +127,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Brand *</Label>
           <select
-            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.brand?._id || form.brand || ""}
             onChange={(e) => {
               const selected = brands.find((b) => b._id === e.target.value);
@@ -145,7 +146,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Category *</Label>
           <select
-            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.category?._id || form.category || ""}
             onChange={(e) => {
               const selected = categories.find((c) => c._id === e.target.value);
