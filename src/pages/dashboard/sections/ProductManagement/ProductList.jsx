@@ -56,12 +56,12 @@ const ProductList = () => {
   }, []);
 
   return (
-    <div className="bg-[#131a25] p-6 rounded-xl shadow-md border border-gray-700 text-white">
+    <div className="bg-[#131a25] text-white p-6 rounded-xl shadow-md border border-gray-700">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-white">🧾 All Products</h2>
+        <h2 className="text-2xl font-bold">🧾 All Products</h2>
         <button
           onClick={handleCreate}
-          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
         >
           + New Product
         </button>
@@ -77,22 +77,45 @@ const ProductList = () => {
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left border border-gray-600">
-          <thead className="bg-gray-800 text-white">
+        <table className="w-full border border-gray-700 text-white text-sm">
+          <thead className="bg-[#1e293b]">
             <tr>
-              <th className="px-4 py-3 border-b border-gray-600">Title</th>
-              <th className="px-4 py-3 border-b border-gray-600">Price</th>
-              <th className="px-4 py-3 border-b border-gray-600">Stock</th>
-              <th className="px-4 py-3 border-b border-gray-600">Published</th>
-              <th className="px-4 py-3 border-b border-gray-600">Actions</th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Image
+              </th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Title
+              </th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Price
+              </th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Stock
+              </th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Published
+              </th>
+              <th className="px-4 py-3 border-b border-gray-600 text-left">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody className="text-gray-300">
+          <tbody>
             {products.map((prod) => (
-              <tr
-                key={prod._id}
-                className="hover:bg-gray-700 transition duration-150"
-              >
+              <tr key={prod._id} className="hover:bg-[#1f2a3b] transition">
+                <td className="px-4 py-3">
+                  {prod.thumbnail ? (
+                    <img
+                      src={prod.thumbnail}
+                      alt={prod.title}
+                      className="w-12 h-12 object-cover rounded-md border border-gray-600"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-600 rounded-md flex items-center justify-center text-sm text-white">
+                      N/A
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3">{prod.title}</td>
                 <td className="px-4 py-3">
                   {prod.discountedPrice
@@ -111,13 +134,13 @@ const ProductList = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(prod)}
-                      className="px-3 py-1 rounded-md border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white transition"
+                      className="border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white px-3 py-1 rounded-md transition"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(prod._id)}
-                      className="px-3 py-1 rounded-md border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition"
+                      className="border border-red-500 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1 rounded-md transition"
                     >
                       Delete
                     </button>
@@ -128,10 +151,10 @@ const ProductList = () => {
             {products.length === 0 && (
               <tr>
                 <td
-                  colSpan="5"
-                  className="text-center text-gray-400 py-8 italic"
+                  colSpan="6"
+                  className="text-center py-6 text-gray-400 italic"
                 >
-                  No products yet.
+                  No products found.
                 </td>
               </tr>
             )}
