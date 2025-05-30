@@ -204,7 +204,7 @@ const AddSubForm = ({ onAdd }) => {
         className="input input-sm input-bordered w-full dark:bg-gray-600 dark:text-white"
       />
       <button
-        className="btn btn-sm btn-secondary"
+        className="btn text-white"
         onClick={() => {
           onAdd(name);
           setName("");
