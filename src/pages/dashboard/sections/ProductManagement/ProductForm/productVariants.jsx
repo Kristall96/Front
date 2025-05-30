@@ -1,27 +1,41 @@
 import React from "react";
 import Label from "./label.jsx";
 
-const ProductVariants = ({ form, setForm, variantCategories }) => {
+const ProductVariants = ({ form, setForm, variantCategories, renderError }) => {
+  const updateVariant = (index, field, value) => {
+    const updated = [...form.variants];
+    updated[index][field] = value;
+    setForm({ ...form, variants: updated });
+  };
+
+  const removeVariant = (index) => {
+    const updated = [...form.variants];
+    updated.splice(index, 1);
+    setForm({ ...form, variants: updated });
+  };
+
   return (
     <div>
       <Label>Variants</Label>
+
       {form.variants.map((v, i) => (
         <div
           key={i}
           className="flex gap-3 items-start md:items-end mb-4 flex-wrap md:flex-nowrap"
         >
           <div className="flex-1">
-            <Label className="text-xs">Category</Label>
+            <Label htmlFor={`variantCategory-${i}`} className="text-xs">
+              Category
+            </Label>
             <select
+              id={`variantCategory-${i}`}
               className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
               value={v.variantCategory?._id || v.variantCategory || ""}
               onChange={(e) => {
                 const selected = variantCategories.find(
                   (vc) => vc._id === e.target.value
                 );
-                const updated = [...form.variants];
-                updated[i].variantCategory = selected;
-                setForm({ ...form, variants: updated });
+                updateVariant(i, "variantCategory", selected || "");
               }}
             >
               <option value="">Select Category</option>
@@ -31,35 +45,33 @@ const ProductVariants = ({ form, setForm, variantCategories }) => {
                 </option>
               ))}
             </select>
+            {renderError && renderError(`variants.${i}.variantCategory`)}
           </div>
 
           <div className="flex-1">
-            <Label className="text-xs">Value</Label>
+            <Label htmlFor={`variantValue-${i}`} className="text-xs">
+              Value
+            </Label>
             <input
+              id={`variantValue-${i}`}
               type="text"
               className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
               value={v.value}
-              onChange={(e) => {
-                const updated = [...form.variants];
-                updated[i].value = e.target.value;
-                setForm({ ...form, variants: updated });
-              }}
+              onChange={(e) => updateVariant(i, "value", e.target.value)}
             />
+            {renderError && renderError(`variants.${i}.value`)}
           </div>
 
           <button
             type="button"
             className="h-9 mt-6 px-3 rounded bg-red-600 hover:bg-red-700 text-white text-sm"
-            onClick={() => {
-              const updated = [...form.variants];
-              updated.splice(i, 1);
-              setForm({ ...form, variants: updated });
-            }}
+            onClick={() => removeVariant(i)}
           >
             ✕
           </button>
         </div>
       ))}
+
       <button
         type="button"
         onClick={() =>
