@@ -59,7 +59,7 @@ const ProductList = () => {
     <div>
       <div className="flex justify-between mb-4">
         <h2 className="text-xl font-semibold">All Products</h2>
-        <button className="btn btn-primary" onClick={handleCreate}>
+        <button className="btn text-white" onClick={handleCreate}>
           + New Product
         </button>
       </div>
