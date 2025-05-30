@@ -8,6 +8,10 @@ const VariantManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    fetchVariants();
+  }, []);
+
   const fetchVariants = async () => {
     try {
       const res = await secureAxios.get("/admin/variant-categories");
@@ -17,16 +21,25 @@ const VariantManager = () => {
     }
   };
 
-  useEffect(() => {
-    fetchVariants();
-  }, []);
+  const generateSlug = (text) =>
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/[^a-z0-9-_]/g, "");
 
   const handleAdd = async () => {
     if (!newName.trim()) return;
     setLoading(true);
     setError("");
+
+    const slug = generateSlug(newName);
+
     try {
-      await secureAxios.post("/admin/variant-categories", { name: newName });
+      await secureAxios.post("/admin/variant-categories", {
+        name: newName,
+        slug,
+      });
       setNewName("");
       fetchVariants();
     } catch (err) {
@@ -39,7 +52,10 @@ const VariantManager = () => {
 
   const handleUpdate = async (id, name) => {
     try {
-      await secureAxios.put(`/admin/variant-categories/${id}`, { name });
+      await secureAxios.put(`/admin/variant-categories/${id}`, {
+        name,
+        slug: generateSlug(name),
+      });
       setEditingId(null);
       fetchVariants();
     } catch (err) {
