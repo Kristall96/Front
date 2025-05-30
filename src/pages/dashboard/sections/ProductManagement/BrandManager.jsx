@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
+import { Plus } from "lucide-react";
 
 const BrandManager = () => {
   const [brands, setBrands] = useState([]);
@@ -66,14 +67,14 @@ const BrandManager = () => {
           value={newBrand}
           onChange={(e) => setNewBrand(e.target.value)}
           placeholder="New brand name"
-          className="w-full px-4 py-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 rounded-md bg-[#1e2633] text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleCreate}
           disabled={loading}
-          className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {loading ? "Adding..." : "+ Add"}
+          <Plus size={16} /> Add
         </button>
       </div>
 
@@ -91,31 +92,31 @@ const BrandManager = () => {
                   handleUpdate(brand._id, e.target.value);
                 }
               }}
-              className="w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
+              className="w-full p-2 rounded-md bg-[#2a3444] text-white border border-gray-600 focus:outline-none mr-4"
             />
           ) : (
-            <span className="font-medium text-lg">{brand.name}</span>
+            <span className="font-medium">{brand.name}</span>
           )}
 
           <div className="flex gap-3 ml-4">
             {editingBrandId === brand._id ? (
               <button
                 onClick={() => setEditingBrandId(null)}
-                className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
+                className="text-sm text-gray-400 hover:text-red-400"
               >
                 Cancel
               </button>
             ) : (
               <button
                 onClick={() => setEditingBrandId(brand._id)}
-                className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                className="text-sm text-blue-400 hover:underline"
               >
                 Edit
               </button>
             )}
             <button
               onClick={() => handleDelete(brand._id)}
-              className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+              className="text-sm text-red-500 hover:underline"
             >
               Delete
             </button>
