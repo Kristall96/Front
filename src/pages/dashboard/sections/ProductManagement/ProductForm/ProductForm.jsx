@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ProductFields from "./ProductFields";
 import ProductSelectors from "./ProductSelectors";
 import ProductImageUploader from "./ProductImageUploader";
-import ProductVariants from "./productVariants"; // fixed casing
+import ProductVariants from "./productVariants";
 import ToggleOptions from "./ToggleOptions";
 import { fetchProductMeta } from "./ProductMetaLoader";
 
@@ -75,20 +75,18 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     } catch (err) {
       const res = err?.response?.data;
 
-      if (res?.errors && typeof res.errors === "object") {
-        setErrors(res.errors);
+      // Prioritize detailed validation errors
+      if (res?.details && typeof res.details === "object") {
+        setErrors(res.details);
       }
 
+      // Fallback general error message
       const fallback =
         typeof res?.error === "string"
           ? res.error
-          : typeof res?.error?.message === "string"
-          ? res.error.message
           : typeof err?.message === "string"
           ? err.message
-          : typeof res?.error === "object" && Object.keys(res.error).length > 0
-          ? JSON.stringify(res.error)
-          : "Something went wrong.";
+          : "Something went wrong while submitting the form.";
 
       setGeneralError(fallback);
     }
