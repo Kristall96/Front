@@ -101,7 +101,7 @@ const CategoryManager = () => {
           className="input input-bordered w-full dark:bg-gray-700 dark:text-white"
         />
         <button
-          className="btn btn-primary"
+          className="btn text-white "
           onClick={handleCreate}
           disabled={loading}
         >
@@ -204,7 +204,7 @@ const AddSubForm = ({ onAdd }) => {
         className="input input-sm input-bordered w-full dark:bg-gray-600 dark:text-white"
       />
       <button
-        className="btn text-white"
+        className="btn btn-sm btn-secondary"
         onClick={() => {
           onAdd(name);
           setName("");
