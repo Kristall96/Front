@@ -59,6 +59,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
 
     const cleanedForm = {
       ...form,
+      price: form.basePrice,
       brand: form.brand?._id || form.brand,
       category: form.category?._id || form.category,
       variants: form.variants.map((v) => ({
@@ -67,17 +68,17 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       })),
     };
 
+    delete cleanedForm.basePrice;
+
     try {
       await onSubmit(cleanedForm);
     } catch (err) {
       const res = err?.response?.data;
 
-      // Field-specific errors
       if (res?.errors && typeof res.errors === "object") {
         setErrors(res.errors);
       }
 
-      // General error fallback
       const fallback =
         typeof res?.error === "string"
           ? res.error
@@ -104,7 +105,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       className="bg-gray-900 p-8 rounded-xl shadow-lg border border-gray-700 space-y-8 text-white"
     >
       <h2 className="text-2xl font-semibold text-white border-b border-gray-700 pb-2">
-        🧾 Product Details
+        📟 Product Details
       </h2>
 
       {generalError && (
