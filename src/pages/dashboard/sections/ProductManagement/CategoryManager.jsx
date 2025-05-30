@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
 
+// Utility: Generate slug from name
+const generateSlug = (text) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
+
 const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
@@ -8,7 +16,6 @@ const CategoryManager = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch all categories
   const fetchCategories = async () => {
     try {
       const res = await secureAxios.get("/admin/categories");
@@ -24,14 +31,15 @@ const CategoryManager = () => {
 
   const handleCreate = async () => {
     if (!newCategory.trim()) return;
+    const slug = generateSlug(newCategory);
     setLoading(true);
     setError("");
 
     try {
-      const res = await secureAxios.post("/admin/categories", {
+      await secureAxios.post("/admin/categories", {
         name: newCategory,
+        slug,
       });
-      console.log("Category created:", res.data);
       setNewCategory("");
       fetchCategories();
     } catch (err) {
@@ -54,7 +62,8 @@ const CategoryManager = () => {
 
   const handleEdit = async (id, newName) => {
     try {
-      await secureAxios.put(`/admin/categories/${id}`, { name: newName });
+      const slug = generateSlug(newName);
+      await secureAxios.put(`/admin/categories/${id}`, { name: newName, slug });
       setEditingCategory(null);
       fetchCategories();
     } catch (err) {
@@ -64,9 +73,11 @@ const CategoryManager = () => {
 
   const handleAddSub = async (catId, subName) => {
     if (!subName.trim()) return;
+    const slug = generateSlug(subName);
     try {
       await secureAxios.post(`/admin/categories/${catId}/subcategories`, {
         name: subName,
+        slug,
       });
       fetchCategories();
     } catch (err) {
@@ -101,7 +112,7 @@ const CategoryManager = () => {
           className="input input-bordered w-full dark:bg-gray-700 dark:text-white"
         />
         <button
-          className="btn text-white "
+          className="btn btn-primary text-white"
           onClick={handleCreate}
           disabled={loading}
         >
@@ -175,8 +186,6 @@ const CategoryManager = () => {
                 </button>
               </div>
             ))}
-
-            {/* Subcategory form */}
             <AddSubForm onAdd={(name) => handleAddSub(cat._id, name)} />
           </div>
         </div>
