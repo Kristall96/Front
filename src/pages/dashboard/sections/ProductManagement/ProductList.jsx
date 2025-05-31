@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
-import ProductForm from "./ProductForm/ProductForm";
+import ProductForm from "./ProductForm";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
