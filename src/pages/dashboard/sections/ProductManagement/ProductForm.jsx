@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../../utils/secureAxios";
 
+// Reusable label component
 const Label = ({ children }) => (
   <label className="block text-sm font-medium text-gray-300 mb-1">
     {children}
@@ -25,18 +26,25 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     variants: [],
   });
 
+  // Dropdown options
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [variantCategories, setVariantCategories] = useState([]);
+
+  // UI state
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // global fallback error
+  const [formErrors, setFormErrors] = useState({}); // field-specific validation errors
 
   useEffect(() => {
-    if (initialData) setForm((prev) => ({ ...prev, ...initialData }));
+    if (initialData) {
+      setForm((prev) => ({ ...prev, ...initialData }));
+    }
     fetchMeta();
   }, []);
 
+  // Load dropdown metadata
   const fetchMeta = async () => {
     try {
       const [brandsRes, catsRes, variantsRes] = await Promise.all([
@@ -49,23 +57,26 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
       setVariantCategories(variantsRes.data);
     } catch (err) {
       console.error("Failed to load metadata", err);
-      setError(
-        "Failed to load brand/category/variant data. Please try again later."
-      );
+      setError("Failed to load brand/category/variant data.");
     }
   };
 
+  // Handle image upload to server
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
     const formData = new FormData();
     files.forEach((file) => formData.append("images", file));
+
     setUploading(true);
     setError("");
+    setFormErrors({});
+
     try {
       const res = await secureAxios.post("/upload/product-images", formData);
       const uploaded = res.data.uploaded;
+
       setForm((prev) => ({
         ...prev,
         images: [...prev.images, ...uploaded],
@@ -79,9 +90,12 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
     }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setFormErrors({});
+
     try {
       const cleanedForm = {
         ...form,
@@ -92,12 +106,19 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           value: v.value,
         })),
       };
+
       await onSubmit(cleanedForm);
     } catch (err) {
       console.error("Product submission failed", err);
-      setError(
-        "Failed to submit product. Please review your input and try again."
-      );
+
+      if (err.response?.data?.errors) {
+        setFormErrors(err.response.data.errors); // backend field validation
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Failed to submit product. Please try again."
+        );
+      }
     }
   };
 
@@ -110,6 +131,7 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         🧾 Product Details
       </h2>
 
+      {/* Global error message */}
       {error && (
         <div className="bg-red-500/10 text-red-400 border border-red-500 rounded p-3">
           ⚠️ {error}
@@ -121,24 +143,35 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Title *</Label>
           <input
-            required
             type="text"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 rounded-md bg-gray-800 text-white border ${
+              formErrors.title ? "border-red-500" : "border-gray-600"
+            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             value={form.title}
             placeholder="E.g. Classic White T-Shirt"
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
+          {formErrors.title && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+          )}
         </div>
 
         <div>
           <Label>Description</Label>
           <textarea
             rows="4"
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 resize-none"
+            className={`w-full px-3 py-2 rounded-md bg-gray-800 text-white border ${
+              formErrors.description ? "border-red-500" : "border-gray-600"
+            } resize-none`}
             value={form.description}
             placeholder="Full product description..."
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
+          {formErrors.description && (
+            <p className="text-red-500 text-sm mt-1">
+              {formErrors.description}
+            </p>
+          )}
         </div>
       </div>
 
@@ -147,7 +180,9 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         <div>
           <Label>Brand *</Label>
           <select
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 rounded-md bg-gray-800 text-white border ${
+              formErrors.brand ? "border-red-500" : "border-gray-600"
+            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             value={form.brand?._id || form.brand || ""}
             onChange={(e) => {
               const selected = brands.find((b) => b._id === e.target.value);
@@ -161,12 +196,17 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               </option>
             ))}
           </select>
+          {formErrors.brand && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.brand}</p>
+          )}
         </div>
 
         <div>
           <Label>Category *</Label>
           <select
-            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 rounded-md bg-gray-800 text-white border ${
+              formErrors.category ? "border-red-500" : "border-gray-600"
+            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             value={form.category?._id || form.category || ""}
             onChange={(e) => {
               const selected = categories.find((c) => c._id === e.target.value);
@@ -185,15 +225,18 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
               </option>
             ))}
           </select>
+          {formErrors.category && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
+          )}
         </div>
       </div>
 
-      {/* Subcategory */}
+      {/* Subcategory (optional, no validation) */}
       {subcategories.length > 0 && (
         <div>
           <Label>Subcategory</Label>
           <select
-            className="select select-bordered w-full bg-gray-800 text-white border-gray-600"
+            className="w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600"
             value={form.subcategory}
             onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
           >
@@ -206,7 +249,6 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
           </select>
         </div>
       )}
-
       {/* Pricing & Stock */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
@@ -219,43 +261,46 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <Label>{label}</Label>
             <input
               type="number"
-              className="no-spinner w-full px-3 py-2 rounded-md bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={form[key] || ""}
+              className={`no-spinner w-full px-3 py-2 rounded-md bg-gray-800 text-white border ${
+                formErrors[key] ? "border-red-500" : "border-gray-600"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              value={form[key] ?? ""}
               onChange={(e) =>
                 setForm({ ...form, [key]: +e.target.value || 0 })
               }
             />
+            {formErrors[key] && (
+              <p className="text-red-500 text-sm mt-1">{formErrors[key]}</p>
+            )}
           </div>
         ))}
       </div>
 
       {/* Images */}
       <div>
-        <div>
-          <Label>Upload Images</Label>
-          <div className="relative w-fit">
-            <input
-              type="file"
-              id="fileUpload"
-              multiple
-              className="hidden"
-              onChange={handleImageUpload}
-            />
-            <label
-              htmlFor="fileUpload"
-              className="cursor-pointer px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white inline-block"
-            >
-              📁 Browse Files
-            </label>
-          </div>
+        <Label>Upload Images</Label>
+        <div className="relative w-fit">
+          <input
+            type="file"
+            id="fileUpload"
+            multiple
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+          <label
+            htmlFor="fileUpload"
+            className="cursor-pointer px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white inline-block"
+          >
+            📁 Browse Files
+          </label>
           {uploading && (
             <p className="text-sm text-gray-400 mt-1">Uploading...</p>
           )}
+          {formErrors.images && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.images}</p>
+          )}
         </div>
 
-        {uploading && (
-          <p className="text-sm text-gray-400 mt-1">Uploading...</p>
-        )}
         <div className="flex gap-2 flex-wrap mt-3">
           {form.images.map((img) => (
             <div key={img} className="relative border rounded shadow-sm">
@@ -304,7 +349,11 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
             <div className="flex-1">
               <Label className="text-xs">Category</Label>
               <select
-                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                className={`w-full px-2 py-1 rounded bg-gray-800 text-white border ${
+                  formErrors[`variants.${i}.variantCategory`]
+                    ? "border-red-500"
+                    : "border-gray-600"
+                }`}
                 value={v.variantCategory?._id || v.variantCategory || ""}
                 onChange={(e) => {
                   const selected = variantCategories.find(
@@ -322,13 +371,22 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                   </option>
                 ))}
               </select>
+              {formErrors[`variants.${i}.variantCategory`] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors[`variants.${i}.variantCategory`]}
+                </p>
+              )}
             </div>
 
             <div className="flex-1">
               <Label className="text-xs">Value</Label>
               <input
                 type="text"
-                className="w-full px-2 py-1 rounded bg-gray-800 text-white border border-gray-600"
+                className={`w-full px-2 py-1 rounded bg-gray-800 text-white border ${
+                  formErrors[`variants.${i}.value`]
+                    ? "border-red-500"
+                    : "border-gray-600"
+                }`}
                 placeholder="e.g. Red, XL"
                 value={v.value}
                 onChange={(e) => {
@@ -337,6 +395,11 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
                   setForm({ ...form, variants: updated });
                 }}
               />
+              {formErrors[`variants.${i}.value`] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors[`variants.${i}.value`]}
+                </p>
+              )}
             </div>
 
             <button
@@ -389,9 +452,11 @@ const ProductForm = ({ onSubmit, initialData = {} }) => {
         </label>
       </div>
 
+      {/* Submit */}
       <button
         type="submit"
         className="w-full mt-6 px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
+        disabled={uploading}
       >
         {initialData ? "Update Product" : "Create Product"}
       </button>
