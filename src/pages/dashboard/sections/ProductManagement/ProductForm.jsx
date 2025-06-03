@@ -118,78 +118,93 @@ const ProductForm = ({ onSuccess }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-gray-900 p-6 rounded-xl shadow-lg border border-gray-700 text-white"
+      className="space-y-6 bg-[#1a1f2b] p-6 rounded-xl shadow-lg border border-gray-700 text-white"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="Product Title"
-          value={form.title}
-          onChange={handleChange}
-          required
-          className="input input-bordered w-full"
-        />
+        <div>
+          <label className="block text-sm mb-1">Product Title</label>
+          <input
+            type="text"
+            name="title"
+            placeholder="Product Title"
+            value={form.title}
+            onChange={handleChange}
+            required
+            className="input input-bordered w-full bg-[#2a3142] border-gray-600"
+          />
+        </div>
 
-        <input
-          type="number"
-          name="basePrice"
-          placeholder="Base Price"
-          value={form.basePrice}
+        <div>
+          <label className="block text-sm mb-1">Base Price</label>
+          <input
+            type="number"
+            name="basePrice"
+            placeholder="Base Price"
+            value={form.basePrice}
+            onChange={handleChange}
+            required
+            className="input input-bordered w-full bg-[#2a3142] border-gray-600"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Description</label>
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
           onChange={handleChange}
           required
-          className="input input-bordered w-full"
+          className="textarea textarea-bordered w-full bg-[#2a3142] border-gray-600"
+          rows={4}
         />
       </div>
 
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={form.description}
-        onChange={handleChange}
-        required
-        className="textarea textarea-bordered w-full"
-        rows={4}
-      />
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          required
-          className="select select-bordered w-full"
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm mb-1">Select Category</label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            required
+            className="select select-bordered w-full bg-[#2a3142] border-gray-600"
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <select
-          name="brand"
-          value={form.brand}
-          onChange={handleChange}
-          required
-          className="select select-bordered w-full"
-        >
-          <option value="">Select Brand</option>
-          {brands.map((b) => (
-            <option key={b._id} value={b._id}>
-              {b.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm mb-1">Select Brand</label>
+          <select
+            name="brand"
+            value={form.brand}
+            onChange={handleChange}
+            required
+            className="select select-bordered w-full bg-[#2a3142] border-gray-600"
+          >
+            <option value="">Select Brand</option>
+            {brands.map((b) => (
+              <option key={b._id} value={b._id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="border-2 border-dashed border-gray-600 p-6 rounded-md text-center"
+        className="border-2 border-dashed border-gray-600 p-6 rounded-md text-center bg-[#1f2634]"
       >
-        <p className="mb-2">Drag and drop images here</p>
+        <p className="mb-2 text-sm">Drag and drop images here</p>
         <input
           type="file"
           multiple
@@ -235,7 +250,7 @@ const ProductForm = ({ onSuccess }) => {
               onChange={(e) =>
                 handleVariantChange(index, "variantCategory", e.target.value)
               }
-              className="select select-sm select-bordered w-full"
+              className="select select-sm select-bordered w-full bg-[#2a3142] border-gray-600"
             >
               <option value="">Select Variant Category</option>
               {variantCategories.map((v) => (
@@ -251,7 +266,7 @@ const ProductForm = ({ onSuccess }) => {
               onChange={(e) =>
                 handleVariantChange(index, "value", e.target.value)
               }
-              className="input input-sm input-bordered w-full"
+              className="input input-sm input-bordered w-full bg-[#2a3142] border-gray-600"
             />
           </div>
         ))}
