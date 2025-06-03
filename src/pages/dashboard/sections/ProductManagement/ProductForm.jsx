@@ -26,10 +26,30 @@ const ProductForm = ({ onSuccess }) => {
           secureAxios.get("/admin/brands"),
           secureAxios.get("/admin/variant-categories"),
         ]);
-        setCategories(cats.data.categories || []);
-        setBrands(brs.data.brands || []);
-        setVariantCategories(vCats.data.categories || []);
+
+        const categories = Array.isArray(cats.data?.categories)
+          ? cats.data.categories
+          : [];
+        const brands = Array.isArray(brs.data?.brands) ? brs.data.brands : [];
+        const variantCategories = Array.isArray(vCats.data?.categories)
+          ? vCats.data.categories
+          : [];
+
+        if (!Array.isArray(cats.data?.categories)) {
+          console.error("Invalid categories response:", cats.data);
+        }
+        if (!Array.isArray(brs.data?.brands)) {
+          console.error("Invalid brands response:", brs.data);
+        }
+        if (!Array.isArray(vCats.data?.categories)) {
+          console.error("Invalid variant categories response:", vCats.data);
+        }
+
+        setCategories(categories);
+        setBrands(brands);
+        setVariantCategories(variantCategories);
       } catch (err) {
+        console.error("Failed to fetch metadata", err);
         toast.error(
           err.response?.data?.message || "Failed to load form metadata."
         );
