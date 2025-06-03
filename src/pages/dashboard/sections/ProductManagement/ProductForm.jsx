@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import secureAxios from "../../../utils/secureAxios";
 import { toast } from "react-toastify";
 
 const ProductForm = ({ onSuccess }) => {
@@ -22,17 +22,16 @@ const ProductForm = ({ onSuccess }) => {
     const fetchMeta = async () => {
       try {
         const [cats, brs, vCats] = await Promise.all([
-          axios.get("/api/categories"),
-          axios.get("/api/brands"),
-          axios.get("/api/variant-categories"),
+          secureAxios.get("/admin/categories"),
+          secureAxios.get("/admin/brands"),
+          secureAxios.get("/admin/variant-categories"),
         ]);
-        setCategories(cats.data.categories);
-        setBrands(brs.data.brands);
-        setVariantCategories(vCats.data.categories);
+        setCategories(cats.data.categories || []);
+        setBrands(brs.data.brands || []);
+        setVariantCategories(vCats.data.categories || []);
       } catch (err) {
         toast.error(
-          "Failed to load form metadata.",
-          err.response?.data?.message || "Error"
+          err.response?.data?.message || "Failed to load form metadata."
         );
       }
     };
@@ -54,18 +53,11 @@ const ProductForm = ({ onSuccess }) => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.url) {
-          uploadedUrls.push(data.url);
+        const res = await secureAxios.post("/upload", formData);
+        if (res.data?.url) {
+          uploadedUrls.push(res.data.url);
         } else {
-          throw new Error(data.message || "Upload failed");
+          throw new Error("No URL returned");
         }
       }
 
@@ -115,7 +107,7 @@ const ProductForm = ({ onSuccess }) => {
     e.preventDefault();
     try {
       const payload = { ...form };
-      const res = await axios.post("/api/admin/products", payload);
+      const res = await secureAxios.post("/admin/products", payload);
       toast.success("Product created successfully!");
       onSuccess?.(res.data.product);
     } catch (err) {
@@ -162,11 +154,12 @@ const ProductForm = ({ onSuccess }) => {
         className="select"
       >
         <option value="">Select Category</option>
-        {categories.map((cat) => (
-          <option key={cat._id} value={cat._id}>
-            {cat.name}
-          </option>
-        ))}
+        {Array.isArray(categories) &&
+          categories.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
+          ))}
       </select>
 
       <select
@@ -177,11 +170,12 @@ const ProductForm = ({ onSuccess }) => {
         className="select"
       >
         <option value="">Select Brand</option>
-        {brands.map((b) => (
-          <option key={b._id} value={b._id}>
-            {b.name}
-          </option>
-        ))}
+        {Array.isArray(brands) &&
+          brands.map((b) => (
+            <option key={b._id} value={b._id}>
+              {b.name}
+            </option>
+          ))}
       </select>
 
       <div
@@ -235,11 +229,12 @@ const ProductForm = ({ onSuccess }) => {
               className="select"
             >
               <option value="">Select Variant Category</option>
-              {variantCategories.map((v) => (
-                <option key={v._id} value={v._id}>
-                  {v.name}
-                </option>
-              ))}
+              {Array.isArray(variantCategories) &&
+                variantCategories.map((v) => (
+                  <option key={v._id} value={v._id}>
+                    {v.name}
+                  </option>
+                ))}
             </select>
             <input
               type="text"
