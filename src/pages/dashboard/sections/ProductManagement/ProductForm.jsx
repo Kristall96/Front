@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import secureAxios from "../../../../utils/secureAxios";
+import secureAxios from "../../../utils/secureAxios";
 import { toast } from "react-toastify";
 
 const ProductForm = ({ onSuccess }) => {
@@ -26,30 +26,10 @@ const ProductForm = ({ onSuccess }) => {
           secureAxios.get("/admin/brands"),
           secureAxios.get("/admin/variant-categories"),
         ]);
-
-        const categories = Array.isArray(cats.data?.categories)
-          ? cats.data.categories
-          : [];
-        const brands = Array.isArray(brs.data?.brands) ? brs.data.brands : [];
-        const variantCategories = Array.isArray(vCats.data?.categories)
-          ? vCats.data.categories
-          : [];
-
-        if (!Array.isArray(cats.data?.categories)) {
-          console.error("Invalid categories response:", cats.data);
-        }
-        if (!Array.isArray(brs.data?.brands)) {
-          console.error("Invalid brands response:", brs.data);
-        }
-        if (!Array.isArray(vCats.data?.categories)) {
-          console.error("Invalid variant categories response:", vCats.data);
-        }
-
-        setCategories(categories);
-        setBrands(brands);
-        setVariantCategories(variantCategories);
+        setCategories(cats.data.categories || []);
+        setBrands(brs.data.brands || []);
+        setVariantCategories(vCats.data.categories || []);
       } catch (err) {
-        console.error("Failed to fetch metadata", err);
         toast.error(
           err.response?.data?.message || "Failed to load form metadata."
         );
@@ -136,16 +116,31 @@ const ProductForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        name="title"
-        placeholder="Product Title"
-        value={form.title}
-        onChange={handleChange}
-        required
-        className="input"
-      />
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-gray-900 p-6 rounded-xl shadow-lg border border-gray-700 text-white"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          type="text"
+          name="title"
+          placeholder="Product Title"
+          value={form.title}
+          onChange={handleChange}
+          required
+          className="input input-bordered w-full"
+        />
+
+        <input
+          type="number"
+          name="basePrice"
+          placeholder="Base Price"
+          value={form.basePrice}
+          onChange={handleChange}
+          required
+          className="input input-bordered w-full"
+        />
+      </div>
 
       <textarea
         name="description"
@@ -153,57 +148,48 @@ const ProductForm = ({ onSuccess }) => {
         value={form.description}
         onChange={handleChange}
         required
-        className="textarea"
+        className="textarea textarea-bordered w-full"
+        rows={4}
       />
 
-      <input
-        type="number"
-        name="basePrice"
-        placeholder="Base Price"
-        value={form.basePrice}
-        onChange={handleChange}
-        required
-        className="input"
-      />
-
-      <select
-        name="category"
-        value={form.category}
-        onChange={handleChange}
-        required
-        className="select"
-      >
-        <option value="">Select Category</option>
-        {Array.isArray(categories) &&
-          categories.map((cat) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          required
+          className="select select-bordered w-full"
+        >
+          <option value="">Select Category</option>
+          {categories.map((cat) => (
             <option key={cat._id} value={cat._id}>
               {cat.name}
             </option>
           ))}
-      </select>
+        </select>
 
-      <select
-        name="brand"
-        value={form.brand}
-        onChange={handleChange}
-        required
-        className="select"
-      >
-        <option value="">Select Brand</option>
-        {Array.isArray(brands) &&
-          brands.map((b) => (
+        <select
+          name="brand"
+          value={form.brand}
+          onChange={handleChange}
+          required
+          className="select select-bordered w-full"
+        >
+          <option value="">Select Brand</option>
+          {brands.map((b) => (
             <option key={b._id} value={b._id}>
               {b.name}
             </option>
           ))}
-      </select>
+        </select>
+      </div>
 
       <div
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="border-dashed border-2 p-4 text-center cursor-pointer"
+        className="border-2 border-dashed border-gray-600 p-6 rounded-md text-center"
       >
-        <p>Drag and drop images here, or click to select</p>
+        <p className="mb-2">Drag and drop images here</p>
         <input
           type="file"
           multiple
@@ -212,17 +198,17 @@ const ProductForm = ({ onSuccess }) => {
           className="hidden"
           id="fileInput"
         />
-        <label htmlFor="fileInput" className="btn mt-2">
+        <label htmlFor="fileInput" className="btn btn-sm btn-outline">
           Browse Images
         </label>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {form.images.map((url) => (
           <div
             key={url}
-            className={`border-2 p-1 cursor-pointer rounded ${
-              form.thumbnail === url ? "border-blue-500" : "border-transparent"
+            className={`border-2 rounded-md overflow-hidden cursor-pointer transition ${
+              form.thumbnail === url ? "border-blue-500" : "border-gray-700"
             }`}
             onClick={() => handleThumbnailSelect(url)}
           >
@@ -232,29 +218,31 @@ const ProductForm = ({ onSuccess }) => {
               className="w-full h-24 object-cover"
             />
             {form.thumbnail === url && (
-              <p className="text-xs text-blue-600 text-center">Thumbnail</p>
+              <p className="text-xs text-center text-blue-400 py-1 bg-gray-800">
+                Thumbnail
+              </p>
             )}
           </div>
         ))}
       </div>
 
       <div className="space-y-2">
+        <h4 className="font-semibold text-gray-300">Variants</h4>
         {form.variants.map((variant, index) => (
-          <div key={index} className="flex gap-2">
+          <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <select
               value={variant.variantCategory}
               onChange={(e) =>
                 handleVariantChange(index, "variantCategory", e.target.value)
               }
-              className="select"
+              className="select select-sm select-bordered w-full"
             >
               <option value="">Select Variant Category</option>
-              {Array.isArray(variantCategories) &&
-                variantCategories.map((v) => (
-                  <option key={v._id} value={v._id}>
-                    {v.name}
-                  </option>
-                ))}
+              {variantCategories.map((v) => (
+                <option key={v._id} value={v._id}>
+                  {v.name}
+                </option>
+              ))}
             </select>
             <input
               type="text"
@@ -263,18 +251,24 @@ const ProductForm = ({ onSuccess }) => {
               onChange={(e) =>
                 handleVariantChange(index, "value", e.target.value)
               }
-              className="input"
+              className="input input-sm input-bordered w-full"
             />
           </div>
         ))}
-        <button type="button" onClick={addVariant} className="btn">
+        <button
+          type="button"
+          onClick={addVariant}
+          className="btn btn-outline btn-sm mt-2"
+        >
           + Add Variant
         </button>
       </div>
 
-      <button type="submit" className="btn btn-primary">
-        Create Product
-      </button>
+      <div className="pt-4 text-right">
+        <button type="submit" className="btn btn-primary">
+          Create Product
+        </button>
+      </div>
     </form>
   );
 };
