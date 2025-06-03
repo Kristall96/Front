@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import secureAxios from "../../../utils/secureAxios";
+import secureAxios from "../../../../utils/secureAxios";
 import { toast } from "react-toastify";
 
 const ProductForm = ({ onSuccess }) => {
