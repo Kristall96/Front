@@ -12,7 +12,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       const res = await secureAxios.get("/admin/products");
-      setProducts(res.data);
+      setProducts(res.data.products || []);
     } catch (err) {
       console.error("Failed to fetch products", err.response?.data);
     }
