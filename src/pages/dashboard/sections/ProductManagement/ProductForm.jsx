@@ -115,7 +115,7 @@ const ProductForm = ({ onSuccess }) => {
         })),
       };
 
-      console.log("Submitting Payload:", payload); // ✅ Add this
+      console.log("🔥 Submitting Payload:", JSON.stringify(payload, null, 2));
 
       const res = await secureAxios.post("/admin/products", payload);
       toast.success("✅ Product created successfully!");
