@@ -44,14 +44,20 @@ const ProductForm = ({ onSuccess }) => {
 
   const handleImageUpload = async (files) => {
     if (!files.length) return;
+
     const uploadedUrls = [];
+
     try {
       for (const file of files) {
         const formData = new FormData();
-        formData.append("file", file);
-        const res = await secureAxios.post("/upload", formData);
-        if (res.data?.url) {
-          uploadedUrls.push(res.data.url);
+        formData.append("images", file); // ✅ correct field name
+
+        const res = await secureAxios.post("/upload/product-images", formData); // ✅ correct route
+
+        if (res.data?.uploaded?.[0]) {
+          uploadedUrls.push(res.data.uploaded[0]);
+        } else {
+          throw new Error("No URL returned from server.");
         }
       }
 
@@ -65,7 +71,7 @@ const ProductForm = ({ onSuccess }) => {
       });
     } catch (err) {
       toast.error("Image upload failed.");
-      console.error("Upload error:", err);
+      console.error("Upload error:", err.response?.data || err.message);
     }
   };
 
