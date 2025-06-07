@@ -104,6 +104,7 @@ const ProductForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+
     try {
       const payload = {
         ...form,
@@ -113,6 +114,8 @@ const ProductForm = ({ onSuccess }) => {
           value: v.value.trim(),
         })),
       };
+
+      console.log("Submitting Payload:", payload); // ✅ Add this
 
       const res = await secureAxios.post("/admin/products", payload);
       toast.success("✅ Product created successfully!");
