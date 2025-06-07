@@ -17,6 +17,7 @@ const ProductForm = ({ onSuccess }) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [variantCategories, setVariantCategories] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchMeta = async () => {
@@ -30,9 +31,7 @@ const ProductForm = ({ onSuccess }) => {
         setBrands(brs.data.brands || []);
         setVariantCategories(vCats.data.categories || []);
       } catch (err) {
-        toast.error(
-          err.response?.data?.message || "Failed to load form metadata."
-        );
+        toast.error(err.response?.data?.message || "Failed to load form data.");
       }
     };
     fetchMeta();
@@ -45,19 +44,14 @@ const ProductForm = ({ onSuccess }) => {
 
   const handleImageUpload = async (files) => {
     if (!files.length) return;
-
     const uploadedUrls = [];
-
     try {
       for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
-
         const res = await secureAxios.post("/upload", formData);
         if (res.data?.url) {
           uploadedUrls.push(res.data.url);
-        } else {
-          throw new Error("No URL returned");
         }
       }
 
@@ -77,13 +71,11 @@ const ProductForm = ({ onSuccess }) => {
 
   const handleDrop = (e) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    handleImageUpload(files);
+    handleImageUpload(Array.from(e.dataTransfer.files));
   };
 
   const handleFileInputChange = (e) => {
-    const files = Array.from(e.target.files);
-    handleImageUpload(files);
+    handleImageUpload(Array.from(e.target.files));
   };
 
   const handleThumbnailSelect = (url) => {
@@ -105,20 +97,36 @@ const ProductForm = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
     try {
-      const payload = { ...form };
+      const payload = {
+        ...form,
+        basePrice: Number(form.basePrice),
+        variants: form.variants.map((v) => ({
+          variantCategory: v.variantCategory,
+          value: v.value.trim(),
+        })),
+      };
+
       const res = await secureAxios.post("/admin/products", payload);
-      toast.success("Product created successfully!");
+      toast.success("✅ Product created successfully!");
       onSuccess?.(res.data.product);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating product.");
+      const validation = err.response?.data?.validationErrors;
+      if (validation) {
+        console.error("Validation Errors:", validation);
+        setErrors(validation);
+        toast.error("Please fix validation errors.");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to create product.");
+      }
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-[#1a1f2b] p-6 rounded-xl shadow-lg border border-gray-700 text-white"
+      className="space-y-6 bg-[#1a1f2b] p-6 rounded-xl shadow-xl border border-gray-700 text-white"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -126,12 +134,14 @@ const ProductForm = ({ onSuccess }) => {
           <input
             type="text"
             name="title"
-            placeholder="Product Title"
             value={form.title}
             onChange={handleChange}
-            required
-            className="input input-bordered w-full bg-[#2a3142] border-gray-600"
+            className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
+            placeholder="Product title"
           />
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -139,12 +149,14 @@ const ProductForm = ({ onSuccess }) => {
           <input
             type="number"
             name="basePrice"
-            placeholder="Base Price"
             value={form.basePrice}
             onChange={handleChange}
-            required
-            className="input input-bordered w-full bg-[#2a3142] border-gray-600"
+            className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
+            placeholder="0.00"
           />
+          {errors.basePrice && (
+            <p className="text-red-500 text-xs mt-1">{errors.basePrice}</p>
+          )}
         </div>
       </div>
 
@@ -152,13 +164,15 @@ const ProductForm = ({ onSuccess }) => {
         <label className="block text-sm mb-1">Description</label>
         <textarea
           name="description"
-          placeholder="Description"
           value={form.description}
           onChange={handleChange}
-          required
-          className="textarea textarea-bordered w-full bg-[#2a3142] border-gray-600"
           rows={4}
+          className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
+          placeholder="Enter detailed product description"
         />
+        {errors.description && (
+          <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,16 +182,18 @@ const ProductForm = ({ onSuccess }) => {
             name="category"
             value={form.category}
             onChange={handleChange}
-            required
-            className="select select-bordered w-full bg-[#2a3142] border-gray-600"
+            className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
           >
-            <option value="">Select Category</option>
+            <option value="">-- Choose Category --</option>
             {categories.map((cat) => (
               <option key={cat._id} value={cat._id}>
                 {cat.name}
               </option>
             ))}
           </select>
+          {errors.category && (
+            <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+          )}
         </div>
 
         <div>
@@ -186,16 +202,18 @@ const ProductForm = ({ onSuccess }) => {
             name="brand"
             value={form.brand}
             onChange={handleChange}
-            required
-            className="select select-bordered w-full bg-[#2a3142] border-gray-600"
+            className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
           >
-            <option value="">Select Brand</option>
-            {brands.map((b) => (
-              <option key={b._id} value={b._id}>
-                {b.name}
+            <option value="">-- Choose Brand --</option>
+            {brands.map((brand) => (
+              <option key={brand._id} value={brand._id}>
+                {brand.name}
               </option>
             ))}
           </select>
+          {errors.brand && (
+            <p className="text-red-500 text-xs mt-1">{errors.brand}</p>
+          )}
         </div>
       </div>
 
@@ -204,7 +222,7 @@ const ProductForm = ({ onSuccess }) => {
         onDragOver={(e) => e.preventDefault()}
         className="border-2 border-dashed border-gray-600 p-6 rounded-md text-center bg-[#1f2634]"
       >
-        <p className="mb-2 text-sm">Drag and drop images here</p>
+        <p className="mb-2 text-sm">Drag and drop images here or</p>
         <input
           type="file"
           multiple
@@ -213,19 +231,27 @@ const ProductForm = ({ onSuccess }) => {
           className="hidden"
           id="fileInput"
         />
-        <label htmlFor="fileInput" className="btn btn-sm btn-outline">
-          Browse Images
+        <label
+          htmlFor="fileInput"
+          className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm cursor-pointer"
+        >
+          Upload Images
         </label>
+        {errors.images && (
+          <p className="text-red-500 text-xs mt-1">{errors.images}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {form.images.map((url) => (
           <div
             key={url}
-            className={`border-2 rounded-md overflow-hidden cursor-pointer transition ${
-              form.thumbnail === url ? "border-blue-500" : "border-gray-700"
-            }`}
             onClick={() => handleThumbnailSelect(url)}
+            className={`border-2 rounded overflow-hidden cursor-pointer ${
+              form.thumbnail === url
+                ? "border-blue-500 ring-2 ring-blue-400"
+                : "border-gray-700"
+            }`}
           >
             <img
               src={url}
@@ -233,7 +259,7 @@ const ProductForm = ({ onSuccess }) => {
               className="w-full h-24 object-cover"
             />
             {form.thumbnail === url && (
-              <p className="text-xs text-center text-blue-400 py-1 bg-gray-800">
+              <p className="text-xs text-center text-blue-300 py-1 bg-gray-800">
                 Thumbnail
               </p>
             )}
@@ -250,7 +276,7 @@ const ProductForm = ({ onSuccess }) => {
               onChange={(e) =>
                 handleVariantChange(index, "variantCategory", e.target.value)
               }
-              className="select select-sm select-bordered w-full bg-[#2a3142] border-gray-600"
+              className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
             >
               <option value="">Select Variant Category</option>
               {variantCategories.map((v) => (
@@ -261,26 +287,32 @@ const ProductForm = ({ onSuccess }) => {
             </select>
             <input
               type="text"
-              placeholder="Value"
               value={variant.value}
+              placeholder="Variant Value"
               onChange={(e) =>
                 handleVariantChange(index, "value", e.target.value)
               }
-              className="input input-sm input-bordered w-full bg-[#2a3142] border-gray-600"
+              className="w-full bg-[#2a3142] border border-gray-600 rounded px-3 py-2"
             />
           </div>
         ))}
+        {errors.variants && (
+          <p className="text-red-500 text-xs mt-1">{errors.variants}</p>
+        )}
         <button
           type="button"
           onClick={addVariant}
-          className="btn btn-outline btn-sm mt-2"
+          className="inline-block px-3 py-1 bg-green-600 hover:bg-green-700 text-sm text-white rounded mt-2"
         >
           + Add Variant
         </button>
       </div>
 
       <div className="pt-4 text-right">
-        <button type="submit" className="btn btn-primary">
+        <button
+          type="submit"
+          className="inline-block px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-md"
+        >
           Create Product
         </button>
       </div>
