@@ -142,8 +142,11 @@ const ProductManagement = () => {
       {showModal && (
         <ManualProductModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          onSuccess={fetchProducts}
+          onClose={() => setShowModal(false)} // ✅ close modal
+          onSuccess={() => {
+            fetchProducts(); // ✅ refresh product list
+            setShowModal(false); // ✅ close modal AFTER success
+          }}
         />
       )}
     </div>

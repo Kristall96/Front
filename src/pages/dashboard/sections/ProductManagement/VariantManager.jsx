@@ -17,9 +17,18 @@ const VariantManager = () => {
   const fetchVariants = async () => {
     try {
       const res = await secureAxios.get("/admin/variant-categories");
-      setVariants(res.data);
+
+      console.log("Fetched variant categories:", res.data);
+
+      const list = Array.isArray(res.data?.categories)
+        ? res.data.categories
+        : [];
+
+      setVariants(list);
     } catch (err) {
       console.error("Failed to load variant categories:", err);
+      setError("Failed to load variant categories.");
+      setVariants([]);
     }
   };
 
@@ -36,15 +45,15 @@ const VariantManager = () => {
     setError("");
     setFieldError("");
 
-    const slug = generateSlug(newName);
-
     try {
+      const slug = generateSlug(newName);
       await secureAxios.post("/admin/variant-categories", {
         name: newName,
         slug,
       });
+
       setNewName("");
-      fetchVariants();
+      await fetchVariants();
     } catch (err) {
       const res = err?.response?.data;
       setError(res?.error || "Add failed");
@@ -56,17 +65,19 @@ const VariantManager = () => {
   };
 
   const handleUpdate = async (id, name) => {
+    if (!name.trim()) return;
     setLoading(true);
     setError("");
     setFieldError("");
 
     try {
       await secureAxios.put(`/admin/variant-categories/${id}`, {
-        name,
+        name: name.trim(),
         slug: generateSlug(name),
       });
+
       setEditingId(null);
-      fetchVariants();
+      await fetchVariants();
     } catch (err) {
       const res = err?.response?.data;
       setError(res?.error || "Update failed");
@@ -79,11 +90,13 @@ const VariantManager = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this variant category?")) return;
+
     try {
       await secureAxios.delete(`/admin/variant-categories/${id}`);
-      fetchVariants();
+      await fetchVariants();
     } catch (err) {
       console.error("Delete failed:", err);
+      setError("Delete failed");
     }
   };
 
@@ -93,6 +106,7 @@ const VariantManager = () => {
         🧩 Variant Categories
       </h2>
 
+      {/* Add Variant */}
       <div className="flex gap-2">
         <input
           value={newName}
@@ -114,52 +128,59 @@ const VariantManager = () => {
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
       {fieldError && <p className="text-sm text-red-400 mt-1">{fieldError}</p>}
 
-      {variants.map((variant) => (
-        <div
-          key={variant._id}
-          className="bg-[#1b2431] rounded-lg p-4 text-white flex justify-between items-center shadow-sm"
-        >
-          {editingId === variant._id ? (
-            <input
-              defaultValue={variant.name}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleUpdate(variant._id, e.target.value);
-                }
-              }}
-              className={`w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border focus:outline-none mr-4 ${
-                fieldError ? "border-red-500" : "border-gray-600"
-              }`}
-            />
-          ) : (
-            <span className="font-medium text-lg">{variant.name}</span>
-          )}
-
-          <div className="flex gap-3 ml-4">
+      {/* Display Variants */}
+      {Array.isArray(variants) && variants.length > 0 ? (
+        variants.map((variant) => (
+          <div
+            key={variant._id}
+            className="bg-[#1b2431] rounded-lg p-4 text-white flex justify-between items-center shadow-sm"
+          >
             {editingId === variant._id ? (
-              <button
-                onClick={() => setEditingId(null)}
-                className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
-              >
-                Cancel
-              </button>
+              <input
+                defaultValue={variant.name}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleUpdate(variant._id, e.target.value);
+                  }
+                }}
+                className={`w-full px-4 py-2 rounded-md bg-[#2a3444] text-white border focus:outline-none mr-4 ${
+                  fieldError ? "border-red-500" : "border-gray-600"
+                }`}
+              />
             ) : (
-              <button
-                onClick={() => setEditingId(variant._id)}
-                className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
-              >
-                Edit
-              </button>
+              <span className="font-medium text-lg">{variant.name}</span>
             )}
-            <button
-              onClick={() => handleDelete(variant._id)}
-              className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-            >
-              Delete
-            </button>
+
+            <div className="flex gap-3 ml-4">
+              {editingId === variant._id ? (
+                <button
+                  onClick={() => setEditingId(null)}
+                  className="px-3 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-500 transition"
+                >
+                  Cancel
+                </button>
+              ) : (
+                <button
+                  onClick={() => setEditingId(variant._id)}
+                  className="px-3 py-1 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(variant._id)}
+                className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p className="text-sm text-gray-400 italic">
+          No variant categories found.
+        </p>
+      )}
     </div>
   );
 };

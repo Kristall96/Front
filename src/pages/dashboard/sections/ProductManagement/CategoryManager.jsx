@@ -37,7 +37,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     try {
       const res = await secureAxios.get("/admin/categories");
-      setCategories(res.data);
+      setCategories(res.data.categories || []); // ✅ Fix here
     } catch (err) {
       console.error("Failed to fetch categories", err);
     }

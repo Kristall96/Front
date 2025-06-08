@@ -17,7 +17,7 @@ const BrandManager = () => {
   const fetchBrands = async () => {
     try {
       const res = await secureAxios.get("/admin/brands");
-      setBrands(res.data);
+      setBrands(res.data.brands || []); // ✅ Ensure it’s always an array
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to load brands.");
