@@ -33,9 +33,13 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
       setForm({
         ...defaultForm,
         ...initialData,
+        category: initialData.category?._id || initialData.category,
+        brand: initialData.brand?._id || initialData.brand,
+        subcategory: initialData.subcategory?.slug || "", // 👈 Fix here
         variants: initialData.variants?.length
           ? initialData.variants.map((v) => ({
-              variantCategory: v.variantCategory || "",
+              variantCategory:
+                v.variantCategory?._id || v.variantCategory || "",
               value: v.value || "",
               preview: v.previewImage || "",
             }))
@@ -642,7 +646,13 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
             isSubmitting ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {isSubmitting ? "Creating..." : "Create Product"}
+          {isSubmitting
+            ? initialData?._id
+              ? "Updating..."
+              : "Creating..."
+            : initialData?._id
+            ? "Update Product"
+            : "Create Product"}
         </button>
       </div>
     </form>

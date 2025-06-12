@@ -1,11 +1,14 @@
 import { useEffect, useState, Fragment } from "react";
 import secureAxios from "../../../../utils/secureAxios";
 import ProductForm from "./ProductForm";
+import ViewProductModal from "./ViewProductModal";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [viewingProduct, setViewingProduct] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -16,10 +19,10 @@ const ProductList = () => {
     }
   };
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setShowForm(true);
-  };
+  // const handleEdit = (product) => {
+  //   setEditingProduct(product);
+  //   setShowForm(true);
+  // };
 
   const handleCreate = () => {
     setEditingProduct(null);
@@ -35,6 +38,10 @@ const ProductList = () => {
     } catch (err) {
       console.error("❌ Delete failed:", err.response?.data);
     }
+  };
+  const handleView = (product) => {
+    setViewingProduct(product);
+    setIsEditing(false);
   };
 
   useEffect(() => {
@@ -150,10 +157,10 @@ const ProductList = () => {
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEdit(prod)}
-                          className="border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white px-3 py-1 rounded-md"
+                          onClick={() => handleView(prod)}
+                          className="border border-gray-500 text-gray-400 hover:bg-gray-700 hover:text-white px-3 py-1 rounded-md"
                         >
-                          Edit
+                          View
                         </button>
                         <button
                           onClick={() => handleDelete(prod._id)}
@@ -179,6 +186,13 @@ const ProductList = () => {
             )}
           </tbody>
         </table>
+        <ViewProductModal
+          viewingProduct={viewingProduct}
+          setViewingProduct={setViewingProduct}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          fetchProducts={fetchProducts}
+        />
       </div>
     </div>
   );
