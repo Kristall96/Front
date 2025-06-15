@@ -18,6 +18,7 @@ const defaultForm = {
   variants: [{ variantCategory: "", value: "" }],
   isPublished: false,
   isFeatured: false,
+  editReason: "",
 };
 
 const ProductForm = ({ onSuccess, initialData = null }) => {
@@ -33,6 +34,7 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
       setForm({
         ...defaultForm,
         ...initialData,
+        editReason: "",
         category: initialData.category?._id || initialData.category,
         brand: initialData.brand?._id || initialData.brand,
         subcategory: initialData.subcategory?.slug || "", // 👈 Fix here
@@ -172,14 +174,13 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
-    console.log("🔥 handleSubmit called");
-
     e.preventDefault();
 
     if (isSubmitting) return; // 🛑 Prevent double submission
     setIsSubmitting(true); // 🔒 Lock submission
-
     setErrors({});
+
+    const isEdit = Boolean(initialData?._id); // ✅ Define first
 
     try {
       const selectedCat = categories.find((cat) => cat._id === form.category);
@@ -187,8 +188,20 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
         (s) => s.slug === form.subcategory
       );
 
+      // 🚨 Check edit reason before constructing payload
+      if (isEdit && !form.editReason?.trim()) {
+        setErrors((prev) => ({
+          ...prev,
+          editReason: "Edit reason is required.",
+        }));
+        toast.error("Please provide a reason for this edit.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const payload = {
         ...form,
+        editReason: isEdit ? form.editReason.trim() : undefined,
         subcategory: selectedSub
           ? { name: selectedSub.name, slug: selectedSub.slug }
           : { name: form.subcategory, slug: form.subcategory },
@@ -200,22 +213,28 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
         stock: form.stock ? Number(form.stock) : 0,
         isPublished: !!form.isPublished,
         isFeatured: !!form.isFeatured,
-        variants: form.variants.map((v) => ({
-          variantCategory: v.variantCategory,
-          value: v.value.trim(),
-          previewImage: v.preview,
-        })),
+        variants: [...form.variants]
+          .map((v) => ({
+            variantCategory: String(v.variantCategory).trim(),
+            value: String(v.value).trim(),
+            previewImage: v.preview?.trim?.() || "",
+          }))
+          .sort(
+            (a, b) =>
+              a.variantCategory.localeCompare(b.variantCategory) ||
+              a.value.localeCompare(b.value)
+          ),
       };
 
       console.log("📤 Submitting payload:", payload);
 
-      const isEdit = Boolean(initialData?._id);
       const res = isEdit
         ? await secureAxios.put(`/admin/products/${initialData._id}`, payload)
         : await secureAxios.post("/admin/products", payload);
 
       toast.success(isEdit ? "✅ Product updated!" : "✅ Product created!");
       onSuccess?.(res.data.product);
+      setForm((prev) => ({ ...prev, editReason: "" }));
     } catch (err) {
       console.log("❌ Full error response:", err.response?.data);
 
@@ -636,6 +655,26 @@ const ProductForm = ({ onSuccess, initialData = null }) => {
           <p className="text-red-500 text-xs">{errors.publishOrFeature}</p>
         )}
       </section>
+      {initialData?._id && (
+        <div className="mt-4">
+          <label className="block text-sm font-medium mb-2 text-gray-200">
+            Reason for Edit <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="editReason"
+            rows={3}
+            value={form.editReason}
+            onChange={handleChange}
+            placeholder="Explain what was changed and why"
+            className={`w-full bg-[#2a3142] border ${
+              errors.editReason ? "border-red-500" : "border-gray-600"
+            } rounded-md px-4 py-2 text-sm`}
+          />
+          {errors.editReason && (
+            <p className="text-red-500 text-xs mt-1">{errors.editReason}</p>
+          )}
+        </div>
+      )}
 
       {/* ── Submit ───────────────────────────────── */}
       <div className="pt-6 text-right">

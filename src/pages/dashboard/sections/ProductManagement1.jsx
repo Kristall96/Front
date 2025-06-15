@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import secureAxios from "../../../utils/secureAxios";
 import ProductCard from "../../../components/ProductCard";
-import ManualProductModal from "../../../components/ManualProductModal"; // Make sure this path is correct
+import ManualProductModal from "../../../components/ManualProductModal";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -23,6 +23,7 @@ const ProductManagement = () => {
           limit: itemsPerPage,
           search: searchQuery,
           showAll: true,
+          isPublished: true, // ✅ Only fetch published products
         },
       });
       setProducts(res.data.products || []);
@@ -68,7 +69,6 @@ const ProductManagement = () => {
           >
             {syncing ? "Syncing..." : "Sync from Printful"}
           </button>
-
           <button
             onClick={() => setShowModal(true)}
             className="px-4 py-2 rounded text-white bg-gray-600 hover:bg-gray-700"
@@ -142,10 +142,10 @@ const ProductManagement = () => {
       {showModal && (
         <ManualProductModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)} // ✅ close modal
+          onClose={() => setShowModal(false)}
           onSuccess={() => {
-            fetchProducts(); // ✅ refresh product list
-            setShowModal(false); // ✅ close modal AFTER success
+            fetchProducts();
+            setShowModal(false);
           }}
         />
       )}
