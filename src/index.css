@@ -93,3 +93,23 @@ body {
 .animate-fade-in {
   animation: fade-in 150ms ease-out forwards;
 }
+
+/* In your CSS or Tailwind */
+.drag-over {
+  @apply border-blue-500 border-2;
+}
+@keyframes customPulse {
+  0%,
+  100% {
+    background-color: rgba(8, 145, 178, 0.1); /* cyan-600/10 */
+    border-color: rgba(34, 211, 238, 0.6); /* cyan-400 */
+  }
+  50% {
+    background-color: rgba(8, 145, 178, 0.2); /* a bit brighter */
+    border-color: rgba(34, 211, 238, 1); /* brighter cyan */
+  }
+}
+
+.custom-pulse {
+  animation: customPulse 1.2s ease-in-out infinite;
+}

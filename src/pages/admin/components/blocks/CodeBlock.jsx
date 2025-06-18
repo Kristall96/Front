@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-export default function CodeBlock({ block, onChange, onDelete }) {
+export default function CodeBlock({ block, onChange }) {
   const textareaRef = useRef(null);
 
   // Handle tab indentation inside textarea
@@ -38,14 +38,6 @@ export default function CodeBlock({ block, onChange, onDelete }) {
       />
 
       {/* Delete button */}
-      <button
-        type="button"
-        onClick={onDelete}
-        className="absolute top-2 right-2 text-red-400 hover:text-red-600 hidden group-hover:block"
-        title="Delete block"
-      >
-        ✕
-      </button>
     </div>
   );
 }

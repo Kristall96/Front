@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import BlockRenderer from "../components/BlockRenderer";
 import SlashCommandMenu from "../components/SlashCommandMenu";
-import BlockSidebar from "../components/BlockSidebar";
-
-const createId = () => Date.now().toString() + Math.floor(Math.random() * 1000);
+import BlockSidebar from "../components/BlockSidebar.jsx";
+import { generateId } from "../../../utils/generateId.js";
+import DropZone from "../components/DropZone.jsx";
+const createId = () => generateId();
 
 export default function Editor({ onSave }) {
   const editorRef = useRef(null);
@@ -14,6 +15,7 @@ export default function Editor({ onSave }) {
   const [status, setStatus] = useState("draft");
   const [previewMode, setPreviewMode] = useState(false);
   const [dropIndex, setDropIndex] = useState(null);
+  const [draggingIndex, setDraggingIndex] = useState(null);
 
   const [blocks, setBlocks] = useState([
     { id: createId(), type: "richtext", content: "" },
@@ -25,6 +27,59 @@ export default function Editor({ onSave }) {
   });
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  useEffect(() => {
+    let scrollAnimation;
+
+    const handleAutoScroll = (e) => {
+      if (!editorRef.current) return;
+
+      const container = editorRef.current;
+      const { clientY } = e;
+      const bounds = container.getBoundingClientRect();
+      const edgeOffset = 80; // px from top/bottom
+      const scrollSpeed = 16;
+
+      const scrollTop = () => {
+        container.scrollBy(0, -scrollSpeed);
+        scrollAnimation = requestAnimationFrame(() => handleAutoScroll(e));
+      };
+
+      const scrollBottom = () => {
+        container.scrollBy(0, scrollSpeed);
+        scrollAnimation = requestAnimationFrame(() => handleAutoScroll(e));
+      };
+
+      // Top edge
+      if (clientY < bounds.top + edgeOffset) {
+        cancelAnimationFrame(scrollAnimation);
+        scrollTop();
+      }
+      // Bottom edge
+      else if (clientY > bounds.bottom - edgeOffset) {
+        cancelAnimationFrame(scrollAnimation);
+        scrollBottom();
+      } else {
+        cancelAnimationFrame(scrollAnimation);
+      }
+    };
+
+    const stopScroll = () => {
+      cancelAnimationFrame(scrollAnimation);
+    };
+
+    if (draggingIndex !== null) {
+      window.addEventListener("dragover", handleAutoScroll);
+      window.addEventListener("dragend", stopScroll);
+      window.addEventListener("drop", stopScroll);
+    }
+
+    return () => {
+      window.removeEventListener("dragover", handleAutoScroll);
+      window.removeEventListener("dragend", stopScroll);
+      window.removeEventListener("drop", stopScroll);
+      stopScroll();
+    };
+  }, [draggingIndex]);
 
   useEffect(() => {
     setSlug(
@@ -90,6 +145,22 @@ export default function Editor({ onSave }) {
     [updated[index], updated[target]] = [updated[target], updated[index]];
     setBlocks(updated);
     pushHistory(updated);
+  };
+  const handleReorder = (index) => {
+    if (draggingIndex === null || draggingIndex === index) return;
+
+    const updated = [...blocks];
+    const [moved] = updated.splice(draggingIndex, 1);
+
+    // ⬇ Adjust for dragging down
+    const adjustedIndex = draggingIndex < index ? index - 1 : index;
+
+    updated.splice(adjustedIndex, 0, moved);
+
+    setBlocks(updated);
+    pushHistory(updated);
+    setDraggingIndex(null);
+    setDropIndex(null);
   };
 
   const handleKeyDown = (e, block, index) => {
@@ -179,12 +250,30 @@ export default function Editor({ onSave }) {
             <option value="published">Published</option>
             <option value="scheduled">Scheduled</option>
           </select>
-          <button
-            onClick={() => setPreviewMode((p) => !p)}
-            className="ml-auto px-4 py-2 border border-blue-600 rounded hover:bg-blue-800"
-          >
-            {previewMode ? "🔧 Edit Mode" : "👁️ Preview Mode"}
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            <span
+              className={`flex items-center gap-1 font-semibold transition-colors duration-300 ${
+                previewMode ? "text-green-400" : "text-pink-400"
+              }`}
+            >
+              {previewMode ? "👁️ Preview Mode" : "✏️ Edit Mode"}
+            </span>
+
+            <div
+              onClick={() => setPreviewMode((p) => !p)}
+              className={`relative w-14 h-7 rounded-full cursor-pointer transition-all duration-500 
+      ${previewMode ? "bg-green-500" : "bg-pink-500"} shadow-inner`}
+            >
+              <div
+                className={`absolute top-1 left-1 w-5 h-5 rounded-full transition-all duration-500 ease-in-out 
+        ${
+          previewMode
+            ? "translate-x-7 bg-green-200 shadow-[0_0_10px_2px_rgba(34,197,94,0.5)]"
+            : "translate-x-0 bg-pink-200 shadow-[0_0_10px_2px_rgba(244,114,182,0.4)]"
+        }`}
+              ></div>
+            </div>
+          </div>
         </div>
 
         <div className="mb-6 flex gap-2">
@@ -204,34 +293,27 @@ export default function Editor({ onSave }) {
           </button>
         </div>
 
-        <article className="space-y-8">
+        <article className="space-y-2">
           {blocks.map((block, index) => (
             <div key={block.id}>
-              {/* Drop zone before each block */}
               {!previewMode && (
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDropIndex(index);
-                  }}
+                <DropZone
+                  isActive={dropIndex === index}
+                  onDrop={() => handleReorder(index)}
+                  onDragEnter={() => setDropIndex(index)}
                   onDragLeave={() => setDropIndex(null)}
-                  onDrop={(e) => {
-                    const type = e.dataTransfer.getData("blockType");
-                    if (type) {
-                      insertBlock(type, index); // ✅ Use `index` directly
-                      setDropIndex(null);
-                    }
-                  }}
-                  className="h-4 flex items-center justify-center"
-                >
-                  {dropIndex === index && (
-                    <div className="h-1 w-full bg-blue-500 rounded-sm shadow-md animate-pulse" />
-                  )}
-                </div>
+                />
               )}
 
-              {/* The actual block */}
-              <div className="relative group">
+              <div
+                draggable={!previewMode}
+                onDragStart={() => setDraggingIndex(index)}
+                onDragEnd={() => {
+                  setDraggingIndex(null);
+                  setDropIndex(null);
+                }}
+                className="relative group"
+              >
                 <BlockRenderer
                   block={block}
                   readOnly={previewMode}
@@ -241,20 +323,42 @@ export default function Editor({ onSave }) {
                 />
 
                 {!previewMode && (
-                  <div className="absolute -left-8 top-3 flex flex-col gap-1 opacity-0 group-hover:opacity-100">
-                    <button
-                      onClick={() => moveBlock(index, -1)}
-                      className="text-sm"
-                    >
-                      ⬆️
-                    </button>
-                    <button
-                      onClick={() => moveBlock(index, 1)}
-                      className="text-sm"
-                    >
-                      ⬇️
-                    </button>
-                  </div>
+                  <>
+                    {/* Sidebar controls on the left */}
+                    <div className="absolute -left-8 top-1/2 -translate-y-1/2 flex flex-col gap-2 p-1 rounded-md bg-slate-800 shadow z-20 opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity duration-200">
+                      <button
+                        onClick={() => moveBlock(index, -1)}
+                        title="Move up"
+                        className="w-6 h-6 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500 rounded"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => moveBlock(index, 1)}
+                        title="Move down"
+                        className="w-6 h-6 flex items-center justify-center text-white bg-gray-600 hover:bg-gray-500 rounded"
+                      >
+                        ↓
+                      </button>
+                      <div
+                        title="Drag block"
+                        className="w-6 h-6 flex items-center justify-center text-gray-300 bg-gray-700 hover:bg-gray-600 rounded cursor-grab"
+                      >
+                        ⠿
+                      </div>
+                    </div>
+
+                    {/* Delete button on the right */}
+                    {!previewMode && (
+                      <button
+                        onClick={() => deleteBlock(block.id)}
+                        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-sm text-red-400 bg-red-400/10 rounded-full opacity-0 group-hover:opacity-100 hover:text-white hover:bg-red-500 transition duration-150 ease-in-out"
+                        title="Delete block"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -262,25 +366,12 @@ export default function Editor({ onSave }) {
 
           {/* Final drop zone at the end */}
           {!previewMode && (
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDropIndex(blocks.length);
-              }}
+            <DropZone
+              isActive={dropIndex === blocks.length}
+              onDrop={() => handleReorder(blocks.length)}
+              onDragEnter={() => setDropIndex(blocks.length)}
               onDragLeave={() => setDropIndex(null)}
-              onDrop={(e) => {
-                const type = e.dataTransfer.getData("blockType");
-                if (type) {
-                  insertBlock(type, blocks.length - 1); // insert at the end
-                  setDropIndex(null);
-                }
-              }}
-              className="h-4 flex items-center justify-center"
-            >
-              {dropIndex === blocks.length && (
-                <div className="h-1 w-full bg-blue-500 rounded-sm shadow-md animate-pulse" />
-              )}
-            </div>
+            />
           )}
         </article>
 

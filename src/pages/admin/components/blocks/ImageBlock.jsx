@@ -1,5 +1,5 @@
 // admin/components/blocks/ImageBlock.jsx
-export default function ImageBlock({ block, onChange, onDelete }) {
+export default function ImageBlock({ block, onChange }) {
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -58,15 +58,6 @@ export default function ImageBlock({ block, onChange, onDelete }) {
           />
         </label>
       )}
-
-      <button
-        type="button"
-        onClick={onDelete}
-        title="Delete image block"
-        className="absolute top-2 right-2 text-red-500 hover:text-red-700 hidden group-hover:block"
-      >
-        ✕
-      </button>
     </div>
   );
 }
