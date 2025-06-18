@@ -1,12 +1,17 @@
+// pages/dashboard/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
+import Navbar from "../../components/Navbar";
+
+// Sections
 import ProfileSection from "./sections/ProfileSection";
 import UserManagement from "./sections/UserManagement";
-import ProductManagement from "./sections/ProductManagement1"; // ✅ NEW
-import ProductManagementSystem from "./sections/ProductManagementSystem"; // ✅ NEW
-import Navbar from "../../components/Navbar";
+import ProductManagement from "./sections/ProductManagement1";
+import ProductManagementSystem from "./sections/ProductManagementSystem";
+import BlogManagement from "./sections/BlogManagement";
+import BlogEditor from "../admin/blog/Editor"; // ✅ Correct path relative to AdminDashboard.jsx
 
 const AdminDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -59,9 +64,13 @@ const AdminDashboard = () => {
       case "users":
         return <UserManagement />;
       case "products":
-        return <ProductManagement />; // ✅ NEW
+        return <ProductManagement />;
       case "products-management":
         return <ProductManagementSystem />;
+      case "blog":
+        return <BlogManagement />;
+      case "blog-editor":
+        return <BlogEditor />; // ✅ handle ?tab=blog-editor
       case "overview":
         return adminStats ? (
           <div className="bg-white p-4 rounded shadow">
@@ -82,8 +91,8 @@ const AdminDashboard = () => {
     <>
       <Navbar />
       <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <div>
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">
+        <div className="min-h-screen bg-[#0f172a] text-white p-6">
+          <h1 className="text-3xl font-bold mb-6 text-white">
             Admin Dashboard
           </h1>
           {renderSection()}

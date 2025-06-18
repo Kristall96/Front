@@ -36,7 +36,7 @@ function App() {
 
         {/* Role-Protected Dashboard Routes */}
         <Route
-          path="/dashboard/admin"
+          path="/dashboard/admin/*"
           element={
             <RoleRoute allowedRoles={["admin"]}>
               <AdminDashboard />
@@ -44,7 +44,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/moderator"
+          path="/dashboard/moderator/*"
           element={
             <RoleRoute allowedRoles={["moderator", "admin"]}>
               <ModeratorDashboard />
@@ -52,7 +52,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/user"
+          path="/dashboard/user/*"
           element={
             <RoleRoute allowedRoles={["user", "moderator", "admin"]}>
               <UserDashboard />
