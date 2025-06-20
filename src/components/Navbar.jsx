@@ -34,10 +34,10 @@ const Navbar = () => {
   if (loading) return null;
 
   return (
-    <header className="bg-black text-white shadow-md border-b border-neutral-800">
+    <header className="bg-[#0b1222] text-white shadow-md border-b border-[#1f2937]">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold tracking-tight">
+        <Link to="/" className="text-2xl font-bold tracking-tight text-white">
           MyApp
         </Link>
 
@@ -48,7 +48,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="hover:text-blue-400 transition-colors"
+                className="text-sm font-medium text-gray-300 hover:text-pink-400 transition-colors"
               >
                 {link.label}
               </Link>
@@ -62,7 +62,7 @@ const Navbar = () => {
             <>
               <Link
                 to={getDashboardPath()}
-                className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded transition-colors"
+                className="bg-[#1c2433] hover:bg-[#2d3a50] text-sm px-4 py-2 rounded-full transition-colors"
               >
                 Dashboard
               </Link>
@@ -71,7 +71,7 @@ const Navbar = () => {
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white transition-colors"
+              className="bg-pink-600 hover:bg-pink-700 px-4 py-2 text-sm rounded-full text-white transition-colors"
             >
               Sign In
             </button>
@@ -89,13 +89,13 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-black border-t border-gray-700 px-4 pb-4">
+        <div className="md:hidden bg-[#0b1222] border-t border-[#1f2937] px-4 pb-4 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
               onClick={() => setMenuOpen(false)}
-              className="block py-2 text-white hover:text-blue-400"
+              className="block py-2 text-gray-300 hover:text-pink-400"
             >
               {link.label}
             </Link>
@@ -106,7 +106,7 @@ const Navbar = () => {
               <Link
                 to={getDashboardPath()}
                 onClick={() => setMenuOpen(false)}
-                className="block py-2 text-white hover:text-blue-400"
+                className="block py-2 text-gray-300 hover:text-pink-400"
               >
                 Dashboard
               </Link>
@@ -118,7 +118,7 @@ const Navbar = () => {
                 setShowLoginModal(true);
                 setMenuOpen(false);
               }}
-              className="mt-2 w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white transition-colors"
+              className="mt-2 w-full bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded-full text-white transition-colors"
             >
               Sign In
             </button>
