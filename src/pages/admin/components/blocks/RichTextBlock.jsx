@@ -12,12 +12,7 @@ import {
   FaListOl,
 } from "react-icons/fa";
 
-export default function RichTextBlock({
-  block,
-  onChange,
-  onKeyDown,
-  onDelete,
-}) {
+export default function RichTextBlock({ block, onChange, onKeyDown }) {
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -315,15 +310,6 @@ export default function RichTextBlock({
         onKeyDown={(e) => onKeyDown?.(e, block)}
         className="min-h-[100px] bg-white text-black p-3 rounded-md border border-gray-300 focus:outline-none transition-shadow focus:shadow-inner"
       ></div>
-
-      {/* Delete Button */}
-      <button
-        onClick={onDelete}
-        className="absolute top-2 right-2 text-red-400 hover:text-red-600 hidden group-hover:block"
-        title="Delete Block"
-      >
-        ✕
-      </button>
     </div>
   );
 }

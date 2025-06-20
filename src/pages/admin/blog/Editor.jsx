@@ -6,6 +6,7 @@ import SlashCommandMenu from "../components/SlashCommandMenu";
 import BlockSidebar from "../components/BlockSidebar.jsx";
 import { generateId } from "../../../utils/generateId.js";
 import DropZone from "../components/DropZone.jsx";
+import { createBlock } from "../../../utils/createBlock.js";
 const createId = () => generateId();
 
 export default function Editor({ onSave }) {
@@ -27,6 +28,7 @@ export default function Editor({ onSave }) {
   });
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+
   useEffect(() => {
     let scrollAnimation;
 
@@ -112,20 +114,16 @@ export default function Editor({ onSave }) {
     }
   };
 
-  const updateBlock = (id, changes) => {
-    const updated = blocks.map((b) => (b.id === id ? { ...b, ...changes } : b));
+  const updateBlock = (id, updatedBlock) => {
+    const updated = blocks.map((b) => (b.id === id ? updatedBlock : b));
     setBlocks(updated);
     pushHistory(updated);
   };
 
   const insertBlock = (type, index) => {
-    const newBlock = {
-      id: createId(),
-      type,
-      content: type === "image" ? {} : "",
-    };
+    const newBlock = createBlock(type);
     const updated = [...blocks];
-    updated.splice(index, 0, newBlock); // ✅ Corrected here
+    updated.splice(index, 0, newBlock);
     setBlocks(updated);
     pushHistory(updated);
     setSlashMenu({ visible: false, index: null, position: {} });
@@ -204,10 +202,16 @@ export default function Editor({ onSave }) {
     console.log("🔍 Final Payload:", payload);
     onSave(payload);
   };
+  const insertLayoutPreset = (presetBlocks, index = blocks.length) => {
+    const updated = [...blocks];
+    updated.splice(index, 0, ...presetBlocks);
+    setBlocks(updated);
+    pushHistory(updated);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#0f172a] text-white">
-      <BlockSidebar />
+      <BlockSidebar onInsertPreset={(blocks) => insertLayoutPreset(blocks)} />
 
       <div
         className="flex-1 overflow-y-auto relative p-8 bg-[#1e293b] border border-slate-700 rounded-xl shadow-2xl max-w-[calc(100%-18rem)] mx-auto"
@@ -317,7 +321,7 @@ export default function Editor({ onSave }) {
                 <BlockRenderer
                   block={block}
                   readOnly={previewMode}
-                  onChange={(val) => updateBlock(block.id, { content: val })}
+                  onChange={(val) => updateBlock(block.id, val)}
                   onKeyDown={(e) => handleKeyDown(e, block, index)}
                   onDelete={() => deleteBlock(block.id)}
                 />

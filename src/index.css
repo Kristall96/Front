@@ -113,3 +113,8 @@ body {
 .custom-pulse {
   animation: customPulse 1.2s ease-in-out infinite;
 }
+
+.column-block {
+  /* flex-shrink: 0; */
+  transition: width 0.01s ease-out;
+}

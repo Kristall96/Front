@@ -1,11 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 
-export default function ParagraphBlock({
-  block,
-  onChange,
-  onKeyDown,
-  onDelete,
-}) {
+export default function ParagraphBlock({ block, onChange, onKeyDown }) {
   const ref = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPos, setToolbarPos] = useState({ top: 0, left: 0 });
@@ -92,13 +87,6 @@ export default function ParagraphBlock({
       />
 
       {/* ❌ Delete button */}
-      <button
-        onClick={onDelete}
-        className="absolute top-2 right-2 text-red-500 hover:text-red-700 hidden group-hover:block"
-        title="Delete Block"
-      >
-        ✕
-      </button>
     </div>
   );
 }
