@@ -24,9 +24,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const res = await secureAxios.get("/auth/refresh", {
-          withCredentials: true,
-        });
+        const res = await secureAxios.post(
+          "/auth/refresh",
+          {},
+          { withCredentials: true }
+        );
 
         const { user, accessToken } = res.data;
         setUser(user);

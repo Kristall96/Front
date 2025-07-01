@@ -16,6 +16,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { COLORS, formatCurrency, getLastNMonths } from "./utils";
 
+// Register ChartJS plugins
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -34,37 +35,25 @@ ChartJS.register(
 export default function RevenueTrendsChart({ data }) {
   const months = getLastNMonths(12);
 
-  // PATCH: outcomes as negative
-  let patched = [];
-  if (
-    Array.isArray(data) &&
-    data.length === months.length &&
-    data.every((d) => typeof d === "object" && d !== null)
-  ) {
-    patched = months.map((month, idx) => ({
+  // PATCH: Use _id.date as the month (as per your backend)
+  const normalized = Array.isArray(data)
+    ? data.map((d) => ({
+        month: d._id?.date || "", // <--- KEY LINE
+        incomes: d.incomes ?? 0,
+        outcomes: d.outcomes ?? 0,
+      }))
+    : [];
+
+  // Guarantee 12 months, zero-filled, in correct order
+  const patched = months.map((month) => {
+    const found = normalized.find((d) => d.month === month);
+    return {
       month,
-      incomes: data[idx]?.incomes ?? 0,
-      outcomes: -(data[idx]?.outcomes ?? 0), // NEGATIVE for downward bar
-      net: (data[idx]?.incomes ?? 0) - (data[idx]?.outcomes ?? 0),
-    }));
-  } else if (Array.isArray(data) && data[0]?.month) {
-    patched = months.map((month) => {
-      const found = data.find((d) => d.month === month);
-      return {
-        month,
-        incomes: found?.incomes ?? 0,
-        outcomes: -(found?.outcomes ?? 0), // NEGATIVE for downward bar
-        net: (found?.incomes ?? 0) - (found?.outcomes ?? 0),
-      };
-    });
-  } else {
-    patched = months.map((month) => ({
-      month,
-      incomes: 0,
-      outcomes: 0,
-      net: 0,
-    }));
-  }
+      incomes: found?.incomes ?? 0,
+      outcomes: -(found?.outcomes ?? 0), // NEGATIVE for downward bar
+      net: (found?.incomes ?? 0) - (found?.outcomes ?? 0),
+    };
+  });
 
   const hasData = patched.some(
     (d) => d.incomes !== 0 || d.outcomes !== 0 || d.net !== 0
@@ -118,7 +107,7 @@ export default function RevenueTrendsChart({ data }) {
       },
       {
         label: "Outcome",
-        data: outcomes, // negative values
+        data: outcomes,
         backgroundColor: outcomes.map((v) =>
           v < 0 ? COLORS.outcome : COLORS.outcomeStub
         ),
@@ -138,7 +127,6 @@ export default function RevenueTrendsChart({ data }) {
           borderWidth: 2,
           borderColor: "#23263a",
           padding: { left: 9, right: 9, top: 3, bottom: 3 },
-          // Show ABS for label!
           formatter: (val) => (val < 0 ? formatCurrency(Math.abs(val)) : ""),
         },
       },
