@@ -4,14 +4,15 @@ import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import Navbar from "../../components/Navbar";
 
-// Sections
 import ProfileSection from "./sections/ProfileSection";
 import UserManagement from "./sections/UserManagement";
 import ProductManagement from "./sections/ProductManagement1";
 import ProductManagementSystem from "./sections/ProductManagementSystem";
 import BlogManagement from "./sections/BlogManagement";
 import BlogEditor from "../admin/blog/RichTextEditor";
-import InvoiceRoutes from "../admin/invoice"; // ✅ NEW: Invoice page
+import InvoiceRoutes from "../admin/invoice";
+import ComplaintsPage from "../admin/complaint/ComplaintPage"; // <-- updated import (filename case)
+import ComplaintDetail from "../admin/complaint/ComplaintDetail";
 
 const AdminDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -19,9 +20,12 @@ const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeTab = searchParams.get("tab") || "profile";
+  const complaintId = searchParams.get("complaintId");
+  const complaintView = searchParams.get("view") || "all"; // NEW
 
-  const setActiveTab = (tab) => {
-    setSearchParams({ tab });
+  const setActiveTab = (tab, extraParams = {}) => {
+    // Supports additional params (like view, complaintId)
+    setSearchParams({ tab, ...extraParams });
   };
 
   const fetchUser = async () => {
@@ -84,23 +88,42 @@ const AdminDashboard = () => {
         ) : (
           <p>Loading admin stats...</p>
         );
+      case "complaints":
+        return (
+          <ComplaintsPage
+            view={complaintView}
+            setView={(view) => setActiveTab("complaints", { view })}
+          />
+        );
+      case "complaints-detail":
+        return (
+          <ComplaintDetail
+            id={complaintId}
+            goBack={() => setActiveTab("complaints")}
+          />
+        );
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }
   };
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <Navbar />
-      <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <div className="min-h-screen bg-[#0f172a] text-white p-6">
-          <h1 className="text-3xl font-bold mb-6 text-white">
-            Admin Dashboard
-          </h1>
-          {renderSection()}
-        </div>
-      </DashboardLayout>
-    </>
+      <div className="flex flex-1 min-h-0">
+        <DashboardLayout
+          activeTab={activeTab.split("-")[0]}
+          setActiveTab={(tab) => setActiveTab(tab)}
+        >
+          <div className="flex-1 flex flex-col bg-[#0f172a] text-white p-6 overflow-hidden">
+            <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {renderSection()}
+            </div>
+          </div>
+        </DashboardLayout>
+      </div>
+    </div>
   );
 };
 

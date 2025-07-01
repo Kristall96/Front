@@ -1,19 +1,18 @@
+// ModeratorDashboard.jsx
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import Navbar from "../../components/Navbar";
+import ComplaintList from "../admin/complaint/ComplaintList"; // <--- Import!
 
 const ModeratorDashboard = () => {
   const [userData, setUserData] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeTab = searchParams.get("tab") || "profile";
-
-  const setActiveTab = (tab) => {
-    setSearchParams({ tab });
-  };
+  const setActiveTab = (tab) => setSearchParams({ tab });
 
   const fetchUser = async () => {
     try {
@@ -34,19 +33,10 @@ const ModeratorDashboard = () => {
     switch (activeTab) {
       case "profile":
         return <ProfileSection user={userData} refreshUser={fetchUser} />;
-      case "orders":
-        return (
-          <p className="text-sm text-gray-600">🧾 Orders coming soon...</p>
-        );
-      case "wishlist":
-        return (
-          <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
-        );
-      case "panel":
-        return <p className="text-sm text-gray-600">📋 Panel coming soon...</p>;
+      // ... other tabs ...
       case "complaints":
         return (
-          <p className="text-sm text-gray-600">📋 Complaints coming soon...</p>
+          <ComplaintList filterAssignedTo={userData._id} role="moderator" />
         );
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
@@ -57,10 +47,8 @@ const ModeratorDashboard = () => {
     <>
       <Navbar />
       <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <div>
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">
-            Moderator Dashboard
-          </h1>
+        <div className="min-h-screen bg-[#0f172a] text-white p-6">
+          <h1 className="text-3xl font-bold mb-6">Moderator Dashboard</h1>
           {renderSection()}
         </div>
       </DashboardLayout>

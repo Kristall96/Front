@@ -11,6 +11,7 @@ const secureAxios = axios.create({
 secureAxios.interceptors.request.use(
   (config) => {
     const token = getAccessTokenBridge();
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -4,6 +4,7 @@ import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import ProfileSection from "./sections/ProfileSection";
 import Navbar from "../../components/Navbar";
+import NewComplaintForm from "../admin/complaint/NewComplaintForm"; // 🚨 new import
 
 const UserDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -42,6 +43,8 @@ const UserDashboard = () => {
         return (
           <p className="text-sm text-gray-600">💖 Wishlist coming soon...</p>
         );
+      case "raise-complaint":
+        return <NewComplaintForm />; // Render the complaint form
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }
@@ -51,7 +54,7 @@ const UserDashboard = () => {
     <>
       <Navbar />
       <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-        <div>
+        <div className="p-6">
           <h1 className="text-3xl font-bold mb-6 text-gray-800">
             User Dashboard
           </h1>
