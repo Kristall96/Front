@@ -12,7 +12,12 @@ import {
   FaListOl,
 } from "react-icons/fa";
 
-export default function RichTextBlock({ block, onChange, onKeyDown }) {
+export default function RichTextBlock({
+  block,
+  onChange,
+  onKeyDown,
+  preview = false,
+}) {
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -227,89 +232,95 @@ export default function RichTextBlock({ block, onChange, onKeyDown }) {
   };
 
   return (
-    <div className="relative group border border-slate-600 bg-[#1e293b] rounded-lg shadow-md p-3 space-y-2">
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-2">
-        <ToolbarButton icon={<FaBold />} onClick={() => exec("bold")} />
-        <ToolbarButton icon={<FaItalic />} onClick={() => exec("italic")} />
-        <ToolbarButton
-          icon={<FaUnderline />}
-          onClick={() => exec("underline")}
-        />
-        <ToolbarButton
-          icon={<FaStrikethrough />}
-          onClick={() => exec("strikeThrough")}
-        />
-        <ToolbarButton icon={<FaLink />} onClick={insertLink} />
-        <ToolbarButton icon={<FaImage />} onClick={insertImage} />
+    <div
+      className={`relative group space-y-2 ${
+        preview
+          ? "border-none bg-transparent p-0 shadow-none"
+          : "border border-slate-600 bg-[#1e293b] rounded-lg shadow-md p-3"
+      }`}
+    >
+      {!preview && (
+        <div className="flex flex-wrap gap-2">
+          <ToolbarButton icon={<FaBold />} onClick={() => exec("bold")} />
+          <ToolbarButton icon={<FaItalic />} onClick={() => exec("italic")} />
+          <ToolbarButton
+            icon={<FaUnderline />}
+            onClick={() => exec("underline")}
+          />
+          <ToolbarButton
+            icon={<FaStrikethrough />}
+            onClick={() => exec("strikeThrough")}
+          />
+          <ToolbarButton icon={<FaLink />} onClick={insertLink} />
+          <ToolbarButton icon={<FaImage />} onClick={insertImage} />
 
-        {/* Headings */}
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(1)}
-          title="H1"
-        />
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(2)}
-          title="H2"
-        />
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(3)}
-          title="H3"
-        />
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(4)}
-          title="H4"
-        />
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(5)}
-          title="H5"
-        />
-        <ToolbarButton
-          icon={<FaHeading />}
-          onClick={() => applyInlineHeading(6)}
-          title="H6"
-        />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(1)}
+            title="H1"
+          />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(2)}
+            title="H2"
+          />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(3)}
+            title="H3"
+          />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(4)}
+            title="H4"
+          />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(5)}
+            title="H5"
+          />
+          <ToolbarButton
+            icon={<FaHeading />}
+            onClick={() => applyInlineHeading(6)}
+            title="H6"
+          />
 
-        {/* Paragraph */}
-        <ToolbarButton
-          icon={<span className="text-sm">¶</span>}
-          onClick={applyParagraph}
-          title="Paragraph"
-        />
+          <ToolbarButton
+            icon={<span className="text-sm">¶</span>}
+            onClick={applyParagraph}
+            title="Paragraph"
+          />
+          <ToolbarButton
+            icon={<FaListUl />}
+            onClick={() => handleListAction("ul")}
+            title="Bullet List"
+          />
+          <ToolbarButton
+            icon={<FaListOl />}
+            onClick={() => handleListAction("ol")}
+            title="Number List"
+          />
+          <ToolbarButton
+            icon={<span className="text-sm font-bold">a.</span>}
+            onClick={() => handleListAction("ol-a")}
+            title="Alphabet List"
+          />
+        </div>
+      )}
 
-        {/* Lists */}
-        {/* Nest UL inside OL */}
-        <ToolbarButton
-          icon={<FaListUl />}
-          onClick={() => handleListAction("ul")}
-          title="Bullet List"
-        />
-        <ToolbarButton
-          icon={<FaListOl />}
-          onClick={() => handleListAction("ol")}
-          title="Number List"
-        />
-        <ToolbarButton
-          icon={<span className="text-sm font-bold">a.</span>}
-          onClick={() => handleListAction("ol-a")}
-          title="Alphabet List"
-        />
-      </div>
-
-      {/* Editable Content */}
+      {/* Editable / Preview Content */}
       <div
         ref={editorRef}
-        contentEditable
+        contentEditable={!preview}
         suppressContentEditableWarning
         onInput={syncContent}
         onKeyDown={(e) => onKeyDown?.(e, block)}
-        className="min-h-[100px] bg-white text-black p-3 rounded-md border border-gray-300 focus:outline-none transition-shadow focus:shadow-inner"
-      ></div>
+        className={`min-h-[100px] text-black transition-shadow ${
+          preview
+            ? "p-0 border-none bg-transparent focus:outline-none"
+            : "p-3 rounded-md border border-gray-300 bg-white focus:outline-none focus:shadow-inner"
+        }`}
+      />
     </div>
   );
 }

@@ -118,3 +118,30 @@ body {
   /* flex-shrink: 0; */
   transition: width 0.01s ease-out;
 }
+
+.underline {
+  text-decoration: underline;
+}
+.line-through {
+  text-decoration: line-through;
+}
+.bg-yellow-200 {
+  background-color: #fefcbf;
+}
+.font-bold {
+  font-weight: 700;
+}
+.italic {
+  font-style: italic;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

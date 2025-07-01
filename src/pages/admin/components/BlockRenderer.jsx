@@ -1,6 +1,11 @@
 import { useState } from "react";
 import ParagraphBlock from "./blocks/ParagraphBlock";
-import HeadingBlock from "./blocks/HeadingBlock";
+import Heading1Block from "./blocks/Heading1Block";
+import Heading2Block from "./blocks/Heading2Block";
+import Heading3Block from "./blocks/Heading3Block";
+import Heading4Block from "./blocks/Heading4Block";
+import Heading5Block from "./blocks/Heading5Block";
+import Heading6Block from "./blocks/Heading6Block";
 import QuoteBlock from "./blocks/QuoteBlock";
 import ImageBlock from "./blocks/ImageBlock";
 import CodeBlock from "./blocks/CodeBlock";
@@ -95,7 +100,11 @@ export default function BlockRenderer({
 
     case "columns":
       return (
-        <div className="columns-container flex w-full gap-0 p-4 border border-slate-600 rounded-md bg-slate-800">
+        <div
+          className={`columns-container flex w-full gap-0 p-4 rounded-md ${
+            readOnly ? "bg-transparent" : "border border-slate-600 bg-slate-800"
+          }`}
+        >
           {block.columns.map((col, colIdx) => {
             const width = col.width || `${100 / block.columns.length}%`;
             const blocksInCol = col.blocks || [];
@@ -106,7 +115,11 @@ export default function BlockRenderer({
                 className="relative flex items-stretch"
                 style={{ width }}
               >
-                <div className="column-block flex flex-col gap-1 border border-slate-500 p-3 rounded w-full min-w-[10%] transition-all">
+                <div
+                  className={`column-block flex flex-col gap-1 rounded w-full min-w-[10%] transition-all ${
+                    readOnly ? "" : "border border-slate-500 p-3"
+                  }`}
+                >
                   {!readOnly && (
                     <div className="text-xs text-blue-400 font-mono mb-1">
                       📦 Column {colIdx + 1} — {width}
@@ -121,7 +134,9 @@ export default function BlockRenderer({
                         onDragLeave={() => setDropIndex(colIdx, null)}
                         onDrop={(e) => {
                           e.preventDefault();
-                          const newType = e.dataTransfer.getData("block-type");
+                          e.stopPropagation();
+                          const newType = e.dataTransfer.getData("blockType");
+
                           const updated = [...block.columns];
 
                           if (newType) {
@@ -163,7 +178,9 @@ export default function BlockRenderer({
                       />
 
                       <div
-                        className="relative group border border-slate-600 rounded px-2 py-2"
+                        className={`relative group rounded ${
+                          readOnly ? "" : "border border-slate-600 px-2 py-2"
+                        }`}
                         draggable={!readOnly}
                         onDragStart={(e) => {
                           e.dataTransfer.setData("block-id", childBlock.id);
@@ -240,7 +257,9 @@ export default function BlockRenderer({
                       onDragLeave={() => setDropIndex(colIdx, null)}
                       onDrop={(e) => {
                         e.preventDefault();
-                        const newType = e.dataTransfer.getData("block-type");
+                        e.stopPropagation();
+                        const newType = e.dataTransfer.getData("blockType");
+
                         const updated = [...block.columns];
 
                         if (newType) {
@@ -315,8 +334,18 @@ export default function BlockRenderer({
         </div>
       );
 
-    case "heading":
-      return <HeadingBlock {...commonProps} />;
+    case "heading1":
+      return <Heading1Block {...commonProps} />;
+    case "heading2":
+      return <Heading2Block {...commonProps} />;
+    case "heading3":
+      return <Heading3Block {...commonProps} />;
+    case "heading4":
+      return <Heading4Block {...commonProps} />;
+    case "heading5":
+      return <Heading5Block {...commonProps} />;
+    case "heading6":
+      return <Heading6Block {...commonProps} />;
     case "quote":
       return <QuoteBlock {...commonProps} />;
     case "image":
@@ -326,7 +355,7 @@ export default function BlockRenderer({
     case "divider":
       return <DividerBlock onDelete={onDelete} />;
     case "richtext":
-      return <RichTextBlock {...commonProps} />;
+      return <RichTextBlock {...commonProps} preview={readOnly} />;
     case "paragraph":
     default:
       return <ParagraphBlock {...commonProps} />;

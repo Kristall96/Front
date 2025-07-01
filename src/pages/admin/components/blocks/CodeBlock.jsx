@@ -1,43 +1,31 @@
-import { useRef } from "react";
+export default function CodeBlock({
+  block,
+  onChange,
+  onKeyDown,
+  readOnly = false,
+}) {
+  if (readOnly) {
+    // ✅ Preview mode: real code block
+    return (
+      <pre className="my-6 p-4 bg-slate-900 text-white text-sm rounded overflow-x-auto">
+        <code className="whitespace-pre-wrap">
+          {block.content || "// Your code here..."}
+        </code>
+      </pre>
+    );
+  }
 
-export default function CodeBlock({ block, onChange }) {
-  const textareaRef = useRef(null);
-
-  // Handle tab indentation inside textarea
-  const handleKeyDown = (e) => {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const textarea = textareaRef.current;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-
-      const newValue =
-        block.content.substring(0, start) + "  " + block.content.substring(end);
-
-      onChange(newValue);
-
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 2;
-      }, 0);
-    }
-  };
-
+  // 📝 Edit mode
   return (
-    <div className="relative group border rounded bg-gray-900 text-white font-mono p-4 shadow-sm">
-      {/* Optional: block label */}
-      <label className="text-sm text-gray-400 mb-2 block">Code Block</label>
-
+    <div className="relative group my-4">
       <textarea
-        ref={textareaRef}
-        className="w-full bg-transparent p-2 resize-y rounded outline-none ring-1 ring-gray-700 focus:ring-2 focus:ring-blue-500"
+        rows={5}
         value={block.content}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="// Start typing your code..."
-        rows={8}
+        onChange={(e) => onChange({ ...block, content: e.target.value })}
+        onKeyDown={onKeyDown}
+        placeholder="Write your code..."
+        className="w-full font-mono text-sm px-3 py-2 bg-slate-900 text-white border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
       />
-
-      {/* Delete button */}
     </div>
   );
 }

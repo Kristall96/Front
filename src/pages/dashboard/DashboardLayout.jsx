@@ -13,6 +13,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   Pencil,
+  FileText,
 } from "lucide-react";
 
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
@@ -33,6 +34,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       },
       { key: "users", label: "Manage Users", icon: <Users size={18} /> },
       { key: "blog", label: "Blog Management", icon: <Pencil size={18} /> },
+      { key: "invoices", label: "Invoices", icon: <FileText size={18} /> },
     ],
     moderator: [
       { key: "profile", label: "My Profile", icon: <User size={18} /> },

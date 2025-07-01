@@ -16,6 +16,8 @@ import Unauthorized from "./pages/Unauthorized";
 
 // Role-Based Route Wrapper
 import RoleRoute from "./components/RoleRoute";
+// invoice routes
+import InvoiceRoutes from "./pages/admin/invoice/index";
 
 function App() {
   const { loading } = useAuth();
@@ -33,7 +35,15 @@ function App() {
         <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/product/:slug" element={<SingleProductPage />} />
-
+        {/* Invoice Routes */}
+        <Route
+          path="/dashboard/admin/invoice/*"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <InvoiceRoutes />
+            </RoleRoute>
+          }
+        />
         {/* Role-Protected Dashboard Routes */}
         <Route
           path="/dashboard/admin/*"

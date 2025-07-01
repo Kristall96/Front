@@ -1,4 +1,3 @@
-// pages/dashboard/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
@@ -11,7 +10,8 @@ import UserManagement from "./sections/UserManagement";
 import ProductManagement from "./sections/ProductManagement1";
 import ProductManagementSystem from "./sections/ProductManagementSystem";
 import BlogManagement from "./sections/BlogManagement";
-import BlogEditor from "../admin/blog/Editor"; // ✅ Correct path relative to AdminDashboard.jsx
+import BlogEditor from "../admin/blog/RichTextEditor";
+import InvoiceRoutes from "../admin/invoice"; // ✅ NEW: Invoice page
 
 const AdminDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -70,7 +70,9 @@ const AdminDashboard = () => {
       case "blog":
         return <BlogManagement />;
       case "blog-editor":
-        return <BlogEditor />; // ✅ handle ?tab=blog-editor
+        return <BlogEditor />;
+      case "invoices":
+        return <InvoiceRoutes />;
       case "overview":
         return adminStats ? (
           <div className="bg-white p-4 rounded shadow">

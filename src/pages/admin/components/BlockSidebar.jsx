@@ -1,14 +1,18 @@
-// admin/components/BlockSidebar.jsx
 import { createBlock } from "../../../utils/createBlock.js";
 
 const BLOCK_TYPES = [
+  { type: "heading1", label: "Heading 1 (H1)" },
+  { type: "heading2", label: "Heading 2 (H2)" },
+  { type: "heading3", label: "Heading 3 (H3)" },
+  { type: "heading4", label: "Heading 4 (H4)" },
+  { type: "heading5", label: "Heading 5 (H5)" },
+  { type: "heading6", label: "Heading 6 (H6)" },
   { type: "paragraph", label: "Paragraph" },
-  { type: "heading", label: "Heading (H1-H6)" },
+  { type: "quote", label: "Quote" },
+  { type: "code", label: "Code Block" },
   { type: "richtext", label: "Rich Text" },
   { type: "image", label: "Image" },
   { type: "video", label: "Video" },
-  { type: "quote", label: "Quote" },
-  { type: "code", label: "Code Block" },
   { type: "divider", label: "Divider" },
 ];
 
@@ -30,7 +34,7 @@ export default function BlockSidebar({ onInsertPreset }) {
           <div
             key={b.type}
             draggable
-            onDragStart={(e) => e.dataTransfer.setData("block-type", b.type)}
+            onDragStart={(e) => e.dataTransfer.setData("blockType", b.type)}
             className="flex items-center gap-2 p-3 bg-[#0f172a] border border-gray-600 rounded-lg cursor-grab active:cursor-grabbing hover:bg-gray-800 transition"
           >
             <span className="text-lg">➕</span>

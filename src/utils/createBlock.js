@@ -7,6 +7,18 @@ const WIDTH_PRESETS = {
   3: ["33.33%", "33.33%", "33.33%"],
 };
 
+// Set of valid text-based types
+const TEXT_BLOCKS = new Set([
+  "paragraph",
+  "quote",
+  "heading1",
+  "heading2",
+  "heading3",
+  "heading4",
+  "heading5",
+  "heading6",
+]);
+
 export function createBlock(type, content = "", options = {}) {
   const id = generateId();
 
@@ -15,7 +27,7 @@ export function createBlock(type, content = "", options = {}) {
       return {
         id,
         type,
-        layout: options.layout || "vertical", // or "flex"
+        layout: options.layout || "vertical",
         children: [],
       };
 
@@ -24,7 +36,7 @@ export function createBlock(type, content = "", options = {}) {
         id,
         type,
         width: options.width || "100%",
-        blocks: options.blocks || [], // Allows any type, including nested layouts
+        blocks: options.blocks || [],
       };
 
     case "columns": {
@@ -35,10 +47,7 @@ export function createBlock(type, content = "", options = {}) {
         width: widths[i] || "100%",
         blocks: options.empty
           ? []
-          : [
-              // Optional: default content can be disabled via `empty: true`
-              createBlock("paragraph", `Column ${i + 1} content`),
-            ],
+          : [createBlock("paragraph", `Column ${i + 1} content`)],
       }));
 
       return {
@@ -49,11 +58,18 @@ export function createBlock(type, content = "", options = {}) {
     }
 
     default:
+      if (TEXT_BLOCKS.has(type)) {
+        return {
+          id,
+          type,
+          content,
+        };
+      }
+
       return {
         id,
         type,
-        content,
-        ...(options.children ? { children: options.children } : {}),
+        ...options,
       };
   }
 }
