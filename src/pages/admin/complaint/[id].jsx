@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import secureAxios from "../../../utils/secureAxios";
+import { useAuth } from "../../../context/AuthContext"; // ← Import your hook
 
 const ComplaintDetail = () => {
   const { query } = useRouter();
   const [complaint, setComplaint] = useState(null);
   const [message, setMessage] = useState("");
+  const { user } = useAuth(); // ← Grab user (with role!) from context
+
+  // Helper: Get base path by user role
+  const getBasePath = () => {
+    if (!user) return "/complaints"; // fallback
+    if (user.role === "admin" || user.role === "moderator")
+      return "/admin/complaints";
+    return "/complaints"; // for regular users
+  };
 
   const fetchComplaint = async () => {
-    const { data } = await secureAxios.get(`/admin/complaints/${query.id}`);
+    if (!query.id) return;
+    const { data } = await secureAxios.get(`${getBasePath()}/${query.id}`);
     setComplaint(data);
   };
 
   const sendMessage = async () => {
-    await secureAxios.post(`/admin/complaints/${query.id}/message`, {
+    await secureAxios.post(`${getBasePath()}/${query.id}/message`, {
       message,
     });
     setMessage("");
@@ -21,9 +32,11 @@ const ComplaintDetail = () => {
   };
 
   useEffect(() => {
-    if (query.id) fetchComplaint();
-  }, [query.id]);
+    if (query.id && user) fetchComplaint();
+    // eslint-disable-next-line
+  }, [query.id, user]);
 
+  if (!user) return <div>Loading user…</div>;
   if (!complaint) return <div>Loading...</div>;
 
   return (

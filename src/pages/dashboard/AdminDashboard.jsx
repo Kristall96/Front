@@ -4,6 +4,7 @@ import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import Navbar from "../../components/Navbar";
 
+// Admin sections (lazy load if needed)
 import ProfileSection from "./sections/ProfileSection";
 import UserManagement from "./sections/UserManagement";
 import ProductManagement from "./sections/ProductManagement1";
@@ -11,7 +12,7 @@ import ProductManagementSystem from "./sections/ProductManagementSystem";
 import BlogManagement from "./sections/BlogManagement";
 import BlogEditor from "../admin/blog/RichTextEditor";
 import InvoiceRoutes from "../admin/invoice";
-import ComplaintsPage from "../admin/complaint/ComplaintPage"; // <-- updated import (filename case)
+import ComplaintDashboard from "../admin/complaint/ComplaintDashboard"; // <-- The TABS dashboard!
 import ComplaintDetail from "../admin/complaint/ComplaintDetail";
 
 const AdminDashboard = () => {
@@ -21,42 +22,41 @@ const AdminDashboard = () => {
 
   const activeTab = searchParams.get("tab") || "profile";
   const complaintId = searchParams.get("complaintId");
-  const complaintView = searchParams.get("view") || "all"; // NEW
 
+  // Helper for tab changes (preserves extra params if needed)
   const setActiveTab = (tab, extraParams = {}) => {
-    // Supports additional params (like view, complaintId)
     setSearchParams({ tab, ...extraParams });
   };
 
-  const fetchUser = async () => {
-    try {
-      const res = await secureAxios.get("/users/me");
-      setUserData(res.data);
-    } catch (err) {
-      console.error("Failed to load profile:", err.response?.data?.message);
-    }
-  };
-
-  const fetchAdminStats = async () => {
-    try {
-      const res = await secureAxios.get("/dashboard/admin");
-      setAdminStats(res.data);
-    } catch (err) {
-      console.error("Failed to load admin stats:", err.response?.data?.message);
-    }
-  };
-
+  // Fetch user and stats on mount
   useEffect(() => {
-    fetchUser();
-    fetchAdminStats();
+    (async () => {
+      try {
+        const res = await secureAxios.get("/users/me");
+        setUserData(res.data);
+      } catch (err) {
+        setUserData(null);
+      }
+    })();
+    (async () => {
+      try {
+        const res = await secureAxios.get("/dashboard/admin");
+        setAdminStats(res.data);
+      } catch (err) {
+        setAdminStats(null);
+      }
+    })();
   }, []);
 
+  // Render dashboard section
   const renderSection = () => {
     if (!userData) return <p>Loading profile...</p>;
 
     switch (activeTab) {
       case "profile":
-        return <ProfileSection user={userData} refreshUser={fetchUser} />;
+        return (
+          <ProfileSection user={userData} refreshUser={() => fetchUser()} />
+        );
       case "orders":
         return (
           <p className="text-sm text-gray-600">📦 Orders coming soon...</p>
@@ -88,13 +88,10 @@ const AdminDashboard = () => {
         ) : (
           <p>Loading admin stats...</p>
         );
+      // Main complaints page: renders complaint dashboard with all 3 tabs!
       case "complaints":
-        return (
-          <ComplaintsPage
-            view={complaintView}
-            setView={(view) => setActiveTab("complaints", { view })}
-          />
-        );
+        return <ComplaintDashboard />;
+      // Complaint detail page (modal or route)
       case "complaints-detail":
         return (
           <ComplaintDetail
@@ -113,7 +110,7 @@ const AdminDashboard = () => {
       <div className="flex flex-1 min-h-0">
         <DashboardLayout
           activeTab={activeTab.split("-")[0]}
-          setActiveTab={(tab) => setActiveTab(tab)}
+          setActiveTab={setActiveTab}
         >
           <div className="flex-1 flex flex-col bg-[#0f172a] text-white p-6 overflow-hidden">
             <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>

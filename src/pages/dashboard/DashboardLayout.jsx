@@ -129,11 +129,9 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       </aside>
 
       {/* Main content: ALWAYS fills viewport, only content scrolls */}
-      <main className="flex-1 flex flex-col  min-h-0 overflow-hidden bg-[#0f172a]">
+      <main className="flex-1 flex flex-col    overflow-hidden bg-[#0f172a]">
         {/* Scrollable dashboard content area */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-          {children}
-        </div>
+        <div className="flex-1 flex flex-col  overflow-y-auto">{children}</div>
       </main>
     </div>
   );

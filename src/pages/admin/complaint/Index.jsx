@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import secureAxios from "../../../utils/secureAxios";
+// import { useAuth } from ...  // If you have a context to get current user role
 
-const ComplaintDetail = () => {
+const ComplaintDetail = ({ role }) => {
   const { query } = useRouter();
   const [complaint, setComplaint] = useState(null);
   const [message, setMessage] = useState("");
+  // const { user } = useAuth(); // if you have an Auth context
+
+  // fallback: If you have no Auth context, pass `role` as a prop when using this component
+  // role = user?.role || 'admin';
+
+  // Dynamically choose endpoint based on role
+  const getBasePath = () =>
+    role === "admin" || role === "moderator"
+      ? "/admin/complaints"
+      : "/complaints";
 
   const fetchComplaint = async () => {
-    const { data } = await secureAxios.get(`/admin/complaints/${query.id}`);
+    if (!query.id) return;
+    const { data } = await secureAxios.get(`${getBasePath()}/${query.id}`);
     setComplaint(data);
   };
 
   const sendMessage = async () => {
-    await secureAxios.post(`/admin/complaints/${query.id}/message`, {
+    await secureAxios.post(`${getBasePath()}/${query.id}/message`, {
       message,
     });
     setMessage("");
@@ -22,6 +34,7 @@ const ComplaintDetail = () => {
 
   useEffect(() => {
     if (query.id) fetchComplaint();
+    // eslint-disable-next-line
   }, [query.id]);
 
   if (!complaint) return <div>Loading...</div>;

@@ -1,9 +1,186 @@
-import { useComplaints } from "./hooks/useComplaint";
+import {
+  useComplaints,
+  useComplaintWithPolling,
+  useAdminComplaintMessage,
+} from "./hooks/useComplaint";
 import { useAuth } from "../../../context/AuthContext";
-import { useState, useEffect, useRef } from "react";
-import secureAxios from "../../../utils/secureAxios";
+import { useState, useRef, useEffect } from "react";
+import { useUpdateComplaintStatus } from "./hooks/useComplaint";
+import toast from "react-hot-toast";
 
-// Helper to get initials
+const STATUS_OPTIONS = [
+  { value: "Under Review", label: "Under Review" },
+  { value: "Resolved", label: "Resolved" },
+  { value: "Closed", label: "Closed" },
+];
+function ConfirmModal({ open, onClose, onConfirm, message }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-[#232c3d] rounded-xl shadow-xl p-6 min-w-[320px] text-white flex flex-col gap-4">
+        <div className="text-base font-semibold">{message}</div>
+        <div className="flex gap-3 justify-end">
+          <button
+            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg"
+            onClick={onClose}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-semibold"
+            onClick={onConfirm}
+            type="button"
+          >
+            Yes, change
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function ComplaintStatusDropdown({ status, complaintId, onStatusChange }) {
+  const [open, setOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const dropdownRef = useRef(null);
+  const updateStatus = useUpdateComplaintStatus();
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (newStatus) => {
+    if (newStatus === status) return setOpen(false);
+    setPendingStatus(newStatus);
+    setShowModal(true);
+  };
+
+  const handleConfirm = async () => {
+    setShowModal(false);
+    setOpen(false);
+    try {
+      await updateStatus.mutateAsync({
+        id: complaintId,
+        status: pendingStatus,
+      });
+      onStatusChange?.(pendingStatus);
+      toast.success("Status updated!"); // <-- Success message
+    } catch (err) {
+      // Show error toast with fallback message
+      toast.error(
+        err?.response?.data?.error ||
+          err?.message ||
+          "Failed to update status. Please try again."
+      );
+    }
+    setPendingStatus(null);
+  };
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        className="flex items-center min-w-[140px] px-4 py-2 rounded-lg bg-[#1e2538] text-white border border-slate-700 shadow font-semibold transition hover:bg-sky-700 focus:ring-2 focus:ring-sky-400"
+        onClick={() => setOpen((v) => !v)}
+        type="button"
+        disabled={updateStatus.isLoading}
+      >
+        {status}
+        <svg
+          className="ml-2 w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+      {open && (
+        <ul className="absolute right-0 z-10 mt-2 bg-[#232c3d] border border-slate-700 rounded-xl shadow-lg min-w-[140px] py-1">
+          {["Under Review", "Resolved", "Closed"].map((opt) => (
+            <li key={opt}>
+              <button
+                className={`w-full text-left px-4 py-2 text-sm rounded-lg transition
+                  ${
+                    opt === status
+                      ? "bg-slate-900 text-sky-300 cursor-not-allowed"
+                      : "hover:bg-blue-500 hover:text-white text-white"
+                  }
+                `}
+                onClick={() => handleSelect(opt)}
+                disabled={opt === status}
+                type="button"
+              >
+                {opt}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Modal for confirmation */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[#232c3d] rounded-xl shadow-xl p-6 min-w-[320px] text-white flex flex-col gap-4">
+            <div className="text-base font-semibold">
+              Are you sure you want to change the status to "{pendingStatus}"?
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg"
+                onClick={() => setShowModal(false)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-semibold flex items-center justify-center"
+                onClick={handleConfirm}
+                type="button"
+                disabled={updateStatus.isLoading}
+              >
+                {updateStatus.isLoading && (
+                  <svg
+                    className="animate-spin h-4 w-4 mr-2"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="white"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="white"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                )}
+                Yes, change
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+// Helper for initials
 const getInitials = (name, fallback = "U") =>
   (name || fallback)
     .split(" ")
@@ -11,6 +188,13 @@ const getInitials = (name, fallback = "U") =>
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+const getRoleInfo = (role) => {
+  if (role === "admin") return { name: "Admin", initials: "A" };
+  if (role === "moderator") return { name: "Moderator", initials: "M" };
+  if (role === "user") return { name: "Customer", initials: "C" };
+  return { name: "User", initials: "U" };
+};
 
 function buildMessages(complaint) {
   if (!complaint) return [];
@@ -35,14 +219,15 @@ export default function ComplaintResponses() {
   const { user } = useAuth();
   const { data: complaints = [], isLoading } = useComplaints();
   const assignedComplaints = complaints.filter(
-    (c) => c.assignedTo && c.assignedTo._id === user?._id
+    (c) =>
+      c.assignedTo &&
+      c.assignedTo._id === user?._id &&
+      c.status !== "Resolved" &&
+      c.status !== "Closed"
   );
   const [selectedId, setSelectedId] = useState(
     assignedComplaints[0]?._id || null
   );
-
-  // ✅ MOVE HOOK TO THE TOP
-  const [refreshKey, setRefreshKey] = useState(0); // force ComplaintChat rerender on send
 
   useEffect(() => {
     if (
@@ -56,28 +241,6 @@ export default function ComplaintResponses() {
   const selectedComplaint = assignedComplaints.find(
     (c) => c._id === selectedId
   );
-
-  // Message sending handler moved up here to pass to input
-  const handleSendMessage = async (
-    complaintId,
-    message,
-    resetInput,
-    setSending
-  ) => {
-    setSending(true);
-    try {
-      await secureAxios.post(`/admin/complaints/${complaintId}/message`, {
-        message,
-      });
-      resetInput();
-      setRefreshKey((k) => k + 1); // trigger reload
-    } catch (err) {
-      alert(
-        err.response?.data?.error || "Failed to send message. Please try again."
-      );
-    }
-    setSending(false);
-  };
 
   if (isLoading)
     return (
@@ -126,6 +289,7 @@ export default function ComplaintResponses() {
       </aside>
 
       {/* Chat Section */}
+      {/* Chat Section */}
       <section className="flex-1 flex flex-col min-h-0 p-4">
         <div className="flex flex-col h-full min-h-0 w-full mx-auto bg-gradient-to-br from-[#232c3d] via-[#202a40] to-[#1a2235] rounded-2xl shadow-xl border border-slate-700 overflow-hidden">
           {/* Chat Header */}
@@ -143,6 +307,20 @@ export default function ComplaintResponses() {
                 </span>
               </div>
             </div>
+            <div className="ml-auto flex items-center gap-2">
+              {selectedComplaint?.assignedTo && (
+                <ComplaintStatusDropdown
+                  status={selectedComplaint.status}
+                  complaintId={selectedComplaint._id}
+                  onStatusChange={(newStatus) => {
+                    // Optionally, immediately unselect if not active
+                    if (newStatus === "Resolved" || newStatus === "Closed") {
+                      setSelectedId(null);
+                    }
+                  }}
+                />
+              )}
+            </div>
           </div>
           {/* MESSAGES (SCROLLABLE) */}
           <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 flex flex-col gap-2 custom-scrollbar bg-transparent">
@@ -150,7 +328,6 @@ export default function ComplaintResponses() {
               <ComplaintChat
                 complaintId={selectedComplaint._id}
                 currentUser={user}
-                refreshKey={refreshKey}
               />
             ) : (
               <div className="flex flex-1 items-center justify-center">
@@ -160,16 +337,6 @@ export default function ComplaintResponses() {
               </div>
             )}
           </div>
-          {/* Chat Input - OUTSIDE/BELOW messages */}
-          <div className="flex items-center gap-3 bg-gradient-to-r from-[#171f30] via-[#1b273a] to-[#22334c] px-6 py-4 border-b border-slate-800 flex-shrink-0">
-            {" "}
-            {selectedComplaint && (
-              <ChatInput
-                complaintId={selectedComplaint._id}
-                onSend={handleSendMessage}
-              />
-            )}
-          </div>
         </div>
       </section>
     </div>
@@ -177,38 +344,39 @@ export default function ComplaintResponses() {
 }
 
 // ---- Chat Bubbles and Message List ----
-function ComplaintChat({ complaintId, currentUser, refreshKey }) {
-  const [complaint, setComplaint] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+function ComplaintChat({ complaintId, currentUser }) {
   const chatEndRef = useRef(null);
 
-  // Fetch complaint (and messages) by ID
-  const fetchComplaintById = async (id) => {
-    setLoading(true);
-    try {
-      const { data } = await secureAxios.get(`/admin/complaints/${id}`);
-      setComplaint(data);
-      setMessages(buildMessages(data));
-    } catch {
-      setComplaint(null);
-      setMessages([]);
-    }
-    setLoading(false);
-  };
+  // Use polling for real-time updates (every 5s)
+  const { data: complaint, isLoading } = useComplaintWithPolling(
+    complaintId,
+    5000
+  );
 
-  useEffect(() => {
-    if (complaintId) fetchComplaintById(complaintId);
-    // eslint-disable-next-line
-  }, [complaintId, refreshKey]);
+  // Mutation hook for sending a message (admin/mod)
+  const sendMessage = useAdminComplaintMessage(complaintId);
 
+  const [message, setMessage] = useState("");
+
+  const messages = buildMessages(complaint);
+
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages.length, loading]);
+  }, [messages.length, isLoading]);
 
-  if (!complaint)
+  // Send message
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!message.trim() || sendMessage.isLoading) return;
+    await sendMessage.mutateAsync(message);
+    setMessage("");
+    // Message will appear automatically after polling interval or if the mutation triggers an invalidation
+  };
+
+  if (isLoading || !complaint)
     return (
       <div className="flex-1 flex items-center justify-center text-gray-400">
         Loading chat...
@@ -225,40 +393,47 @@ function ComplaintChat({ complaintId, currentUser, refreshKey }) {
           </p>
         )}
         {messages.map((msg, idx) => {
-          const isAdmin = msg.role === "admin";
-          const name = isAdmin ? currentUser?.name || "You" : "Customer";
+          // Correct "You"/role display
+          const isMe =
+            (msg.role === currentUser?.role &&
+              msg.sender === currentUser?.id) ||
+            (msg.role === "admin" && currentUser?.role === "admin") ||
+            (msg.role === "moderator" && currentUser?.role === "moderator");
+          const { name: roleName, initials } = getRoleInfo(msg.role);
+
           return (
             <div
               key={idx}
               className={`flex items-end gap-2 ${
-                isAdmin ? "justify-end" : "justify-start"
+                isMe ? "justify-end" : "justify-start"
               }`}
             >
-              {!isAdmin && (
+              {/* Avatar/initials */}
+              {!isMe && (
                 <div className="flex-shrink-0">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 flex items-center justify-center font-bold text-white text-xs shadow border-2 border-white">
-                    {getInitials(name)}
+                    {initials}
                   </div>
                 </div>
               )}
               <div
                 className={`
-                  px-4 py-2.5 
-                  rounded-[22px]
-                  max-w-[68%]
-                  break-words
-                  shadow-md
-                  text-[14px]
-                  ${
-                    isAdmin
-                      ? "bg-gradient-to-br from-blue-400 to-cyan-400 text-white rounded-br-lg"
-                      : "bg-white text-gray-900 rounded-bl-lg"
-                  }
-                  transition
-                  `}
+    px-4 py-2.5 
+    rounded-[22px]
+    max-w-[90%] sm:max-w-[75%] md:max-w-[60%] lg:max-w-[50%]
+    break-words
+    shadow-md
+    text-[14px]
+    ${
+      isMe
+        ? "bg-gradient-to-br from-blue-400 to-cyan-400 text-white rounded-br-lg"
+        : "bg-white text-gray-900 rounded-bl-lg"
+    }
+    transition
+  `}
               >
                 <div className="text-[11px] mb-1 opacity-60 flex items-center gap-1">
-                  <span>{name}</span>
+                  <span>{isMe ? "You" : roleName}</span>
                   <span className="mx-1">•</span>
                   <span>
                     {msg.sentAt
@@ -269,14 +444,14 @@ function ComplaintChat({ complaintId, currentUser, refreshKey }) {
                       : ""}
                   </span>
                 </div>
-                <div className="whitespace-pre-wrap break-words max-h-28 overflow-y-auto pr-1">
+                <div className="whitespace-pre-wrap break-words break-all leading-tight">
                   {msg.message}
                 </div>
               </div>
-              {isAdmin && (
+              {isMe && (
                 <div className="flex-shrink-0">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 flex items-center justify-center font-bold text-white text-xs shadow border-2 border-white">
-                    {getInitials(currentUser?.name, "A")}
+                    {getInitials(currentUser?.name, initials)}
                   </div>
                 </div>
               )}
@@ -285,142 +460,28 @@ function ComplaintChat({ complaintId, currentUser, refreshKey }) {
         })}
         <div ref={chatEndRef} />
       </div>
-    </div>
-  );
-}
-
-// ---- Modern Chat Input Field (OUTSIDE chat scroll) ----
-function ChatInput({ complaintId, onSend }) {
-  const [message, setMessage] = useState("");
-  const [sending, setSending] = useState(false);
-
-  const resetInput = () => setMessage("");
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!message.trim() || sending) return;
-    await onSend(complaintId, message, resetInput, setSending);
-  };
-
-  return (
-    <form
-      className="w-full flex justify-center items-end"
-      onSubmit={handleSend}
-      autoComplete="off"
-      style={{ margin: 0, padding: 0 }}
-    >
-      <div className="relative w-full max-w-xl flex justify-center">
-        {/* Outer Glow Bubble */}
-        <div
-          className="absolute -inset-[2px] rounded-2xl z-0 pointer-events-none
-      bg-gradient-to-tr from-cyan-400/50 via-blue-700/40 to-purple-700/30
-      blur-md animate-pulse"
-          aria-hidden="true"
+      {/* Sticky chat input */}
+      <form
+        className="flex gap-2 p-4 border-t border-slate-800 bg-slate-900/95 rounded-b-xl shadow-inner"
+        onSubmit={handleSend}
+        autoComplete="off"
+      >
+        <input
+          className="flex-1 px-4 py-3 rounded-lg bg-[#263149] text-white focus:outline-none focus:ring-2 focus:ring-sky-400/80 transition shadow-md"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message…"
+          disabled={sendMessage.isLoading}
+          maxLength={1000}
         />
-
-        {/* Chat bar */}
-        <div
-          className="
-      relative flex flex-row items-end gap-2 w-full
-      bg-gradient-to-br from-[#202a3a]/95 via-[#192338]/90 to-[#181f2c]/90
-      border border-blue-900/60
-      rounded-2xl shadow-[0_1px_8px_0_rgba(0,20,40,0.09)]
-      px-3 py-1
-      z-10
-      backdrop-blur-md
-      focus-within:ring-2 focus-within:ring-cyan-400/60
-      transition
-    "
+        <button
+          className="bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-700 px-6 py-3 rounded-lg text-white font-semibold shadow-lg border border-blue-400/50 transition"
+          type="submit"
+          disabled={sendMessage.isLoading}
         >
-          <textarea
-            className="
-          flex-1 w-full
-          bg-transparent outline-none border-none
-          text-slate-200 placeholder-cyan-100
-          text-[15px] resize-none
-          px-3 py-2
-          min-h-[36px] max-h-[68px]
-          rounded-xl
-          overflow-y-auto
-          focus:bg-[#232c3d]/95
-          transition duration-150
-          scrollbar-thin scrollbar-thumb-[#253051] scrollbar-track-transparent
-        "
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your response…"
-            disabled={sending}
-            rows={1}
-            style={{
-              // Ensure text is never flush with border
-              boxSizing: "border-box",
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend(e);
-              }
-            }}
-          />
-
-          <button
-            className="
-          px-6 py-2
-          rounded-xl font-bold
-          bg-gradient-to-br from-blue-500 to-cyan-500
-          text-white shadow
-          border border-cyan-400/30
-          hover:from-cyan-400 hover:to-blue-400 hover:scale-105
-          focus:outline-none focus:ring-2 focus:ring-cyan-400/50
-          transition duration-150
-          flex items-center gap-1
-          text-[15px]
-          active:scale-95
-        "
-            type="submit"
-            disabled={sending}
-            style={{ alignSelf: "center", height: "40px" }}
-          >
-            {sending ? (
-              <svg
-                className="w-4 h-4 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8z"
-                />
-              </svg>
-            ) : (
-              <>
-                Send
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 12h14m0 0l-5-5m5 5l-5 5"
-                  />
-                </svg>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </form>
+          {sendMessage.isLoading ? "Sending…" : "Send"}
+        </button>
+      </form>
+    </div>
   );
 }
