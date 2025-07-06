@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import secureAxios from "../../utils/secureAxios";
 import DashboardLayout from "./DashboardLayout";
 import Navbar from "../../components/Navbar";
 import ProfileSection from "./sections/ProfileSection";
-import ComplaintDashboard from "../admin/complaint/ComplaintDashboard"; // <-- Use the TABS dashboard!
+import ComplaintDashboard from "../admin/complaint/ComplaintDashboard";
 import ComplaintDetail from "../admin/complaint/ComplaintDetail";
+import ToDoDashboard from "../admin/todo/ToDoDashboard"; // <-- Add this import
 
 const ModeratorDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -14,22 +15,24 @@ const ModeratorDashboard = () => {
   const activeTab = searchParams.get("tab") || "profile";
   const complaintId = searchParams.get("complaintId");
 
-  // Helper for tab changes (preserves extra params if needed)
+  // Profile fetch (also for ProfileSection refresh)
+  const fetchUser = useCallback(async () => {
+    try {
+      const res = await secureAxios.get("/users/me");
+      setUserData(res.data);
+    } catch {
+      setUserData(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // Tab change helper
   const setActiveTab = (tab, extraParams = {}) => {
     setSearchParams({ tab, ...extraParams });
   };
-
-  // Load moderator info
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await secureAxios.get("/users/me");
-        setUserData(res.data);
-      } catch (err) {
-        setUserData(null);
-      }
-    })();
-  }, []);
 
   // Main content switch
   const renderSection = () => {
@@ -37,13 +40,9 @@ const ModeratorDashboard = () => {
 
     switch (activeTab) {
       case "profile":
-        return (
-          <ProfileSection user={userData} refreshUser={() => fetchUser()} />
-        );
-      // Complaint dashboard with all tabs (All, Assigned, Responses)
+        return <ProfileSection user={userData} refreshUser={fetchUser} />;
       case "complaints":
         return <ComplaintDashboard user={userData} role="moderator" />;
-      // Complaint detail modal/route
       case "complaints-detail":
         return (
           <ComplaintDetail
@@ -51,6 +50,8 @@ const ModeratorDashboard = () => {
             goBack={() => setActiveTab("complaints")}
           />
         );
+      case "todos":
+        return <ToDoDashboard />;
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }

@@ -14,14 +14,10 @@ import {
   LayoutDashboard,
   Pencil,
   FileText,
+  ClipboardCheck, // <-- ADD THIS ICON FROM LUCIDE!
 } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 
-/**
- * DashboardLayout:
- * - Sidebar stays fixed, never scrolls out of view.
- * - Only the main content area scrolls (on overflow).
- * - Responsive, flex-based, production-ready.
- */
 const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -46,6 +42,17 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         label: "Complaints",
         icon: <AlertCircle size={18} />,
       },
+      // ⬇️ ADD CALENDAR TAB FOR ADMIN
+      {
+        key: "calendar",
+        label: "Calendars",
+        icon: <CalendarIcon size={18} />,
+      },
+      {
+        key: "todos",
+        label: "To Dos",
+        icon: <ClipboardCheck size={18} />,
+      },
     ],
     moderator: [
       { key: "profile", label: "My Profile", icon: <User size={18} /> },
@@ -60,6 +67,17 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         key: "complaints",
         label: "Complaints",
         icon: <AlertCircle size={18} />,
+      },
+      {
+        key: "todos",
+        label: "To Dos",
+        icon: <ClipboardCheck size={18} />,
+      },
+
+      {
+        key: "calendar",
+        label: "Calendars",
+        icon: <CalendarIcon size={18} />,
       },
     ],
     user: [
@@ -129,9 +147,9 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
       </aside>
 
       {/* Main content: ALWAYS fills viewport, only content scrolls */}
-      <main className="flex-1 flex flex-col    overflow-hidden bg-[#0f172a]">
+      <main className="flex-1 flex flex-col overflow-hidden bg-[#0f172a]">
         {/* Scrollable dashboard content area */}
-        <div className="flex-1 flex flex-col  overflow-y-auto">{children}</div>
+        <div className="flex-1 flex flex-col overflow-y-auto">{children}</div>
       </main>
     </div>
   );
