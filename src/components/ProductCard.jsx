@@ -18,73 +18,78 @@ const ProductCard = ({ product, onDelete }) => {
   } = product;
 
   return (
-    <div className="rounded-xl overflow-hidden border bg-white shadow-sm hover:shadow-md transition duration-200">
+    <div className="bg-[#1f2937] rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl">
+      {/* Product Image */}
       <Link to={`/product/${slug}`} className="block">
         <img
           src={imageUrl || "/placeholder.jpg"}
           alt={title}
-          className="w-full h-48 object-contain bg-gray-50"
+          className="w-full h-56 object-cover rounded-t-xl"
           loading="lazy"
         />
       </Link>
 
-      <div className="p-4 space-y-1">
+      {/* Product Info */}
+      <div className="p-6 space-y-4">
         {/* Title */}
-        <h3 className="text-lg font-semibold text-gray-800 truncate">
+        <h3 className="text-xl font-semibold text-white truncate hover:text-blue-500 transition duration-300">
           {title}
         </h3>
 
-        {/* Price & Discount */}
-        <p className="text-sm text-gray-700">
-          €{finalPrice?.toFixed(2)}{" "}
-          {discountPercentage > 0 && (
-            <span className="text-xs text-red-500">
-              ({discountPercentage}% OFF)
-            </span>
-          )}
-        </p>
+        {/* Price and Discount */}
+        <div className="flex items-center justify-between">
+          <p className="text-lg font-medium text-gray-200">
+            €{finalPrice?.toFixed(2)}{" "}
+            {discountPercentage > 0 && (
+              <span className="text-sm text-red-400">
+                ({discountPercentage}% OFF)
+              </span>
+            )}
+          </p>
+        </div>
 
-        {/* Category & Brand */}
-        <p className="text-xs text-gray-500">
-          {category?.name || "No Category"} | {brand?.name || "No Brand"}
+        {/* Category and Brand */}
+        <p className="text-sm text-gray-400">
+          {category?.name || "No Category"}
         </p>
+        <p className="text-sm text-gray-400">{brand?.name || "No Brand"}</p>
 
-        {/* Status */}
-        <div className="flex gap-2 mt-1 text-xs">
+        {/* Product Status */}
+        <div className="flex gap-2 mt-2 text-xs">
           {isPublished && (
-            <span className="px-2 py-0.5 rounded bg-green-600 text-white">
+            <span className="px-2 py-0.5 rounded-full bg-green-500 text-white">
               Published
             </span>
           )}
           {isFeatured && (
-            <span className="px-2 py-0.5 rounded bg-yellow-400 text-black">
+            <span className="px-2 py-0.5 rounded-full bg-yellow-500 text-black">
               Featured
             </span>
           )}
           {!isPublished && !isFeatured && (
-            <span className="px-2 py-0.5 rounded bg-gray-400 text-white">
+            <span className="px-2 py-0.5 rounded-full bg-gray-500 text-white">
               Draft
             </span>
           )}
         </div>
 
-        {/* Variants + Stock */}
-        <p className="text-xs text-gray-400">
+        {/* Variants and Stock */}
+        <div className="text-sm text-gray-400">
           {variants?.length || 0} variant{variants?.length !== 1 ? "s" : ""} |{" "}
           {stock ?? 0} in stock
-        </p>
+        </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 mt-3">
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-4">
           <Link
             to={`/product/${slug}`}
-            className="flex-1 text-center bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 transition"
+            className="w-1/3 text-center bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition duration-200"
           >
             View
           </Link>
 
           <button
-            className="flex-1 text-center bg-yellow-400 text-white px-3 py-1 text-sm rounded hover:bg-yellow-500 transition"
+            className="w-1/3 text-center bg-yellow-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 hover:shadow-lg transition duration-200"
             disabled
           >
             Edit
@@ -92,10 +97,8 @@ const ProductCard = ({ product, onDelete }) => {
 
           <button
             onClick={() => onDelete && onDelete(_id)}
-            className={`flex-1 text-center text-white px-3 py-1 text-sm rounded transition ${
-              source === "printful"
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-red-500 hover:bg-red-600"
+            className={`w-1/3 text-center bg-red-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-red-600 hover:shadow-lg transition duration-200 ${
+              source === "printful" ? "bg-gray-300 cursor-not-allowed" : ""
             }`}
             disabled={source === "printful"}
           >

@@ -17,7 +17,7 @@ const ProductManagement = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await secureAxios.get("/products", {
+      const res = await secureAxios.get("/admin/products", {
         params: {
           page: currentPage,
           limit: itemsPerPage,

@@ -14,7 +14,7 @@ import {
   LayoutDashboard,
   Pencil,
   FileText,
-  ClipboardCheck, // <-- ADD THIS ICON FROM LUCIDE!
+  ClipboardCheck,
 } from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -42,7 +42,6 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         label: "Complaints",
         icon: <AlertCircle size={18} />,
       },
-      // ⬇️ ADD CALENDAR TAB FOR ADMIN
       {
         key: "calendar",
         label: "Calendars",
@@ -52,6 +51,16 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         key: "todos",
         label: "To Dos",
         icon: <ClipboardCheck size={18} />,
+      },
+      {
+        key: "email-marketing",
+        label: "Email Marketing",
+        icon: <FileText size={18} />,
+      },
+      {
+        key: "chat",
+        label: "Chat",
+        icon: <ShieldCheck size={18} />,
       },
     ],
     moderator: [
@@ -73,11 +82,15 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         label: "To Dos",
         icon: <ClipboardCheck size={18} />,
       },
-
       {
         key: "calendar",
         label: "Calendars",
         icon: <CalendarIcon size={18} />,
+      },
+      {
+        key: "chat",
+        label: "Chat",
+        icon: <ShieldCheck size={18} />,
       },
     ],
     user: [
@@ -95,12 +108,12 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
   const links = navItems[user?.role] || [];
 
   return (
-    <div className="flex flex-1 min-h-0 bg-[#0f172a] text-white">
+    <div className="flex flex-1 min-h-screen bg-[#0f172a] text-white">
       {/* Sidebar */}
       <aside
         className={`relative flex flex-col transition-all duration-300 ease-in-out ${
-          collapsed ? "w-[80px]" : "w-64"
-        } bg-[#0f172a] border-r border-gray-800`}
+          collapsed ? "w-20 min-w-0" : "w-64"
+        } bg-[#0f172a] border-r border-gray-800 min-h-screen`}
       >
         <div className="absolute top-5 right-[-12px] z-30">
           <button
@@ -122,7 +135,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
           </h2>
         </div>
 
-        <nav className="mt-4 space-y-1 px-2 flex-1">
+        <nav className="mt-4 space-y-1 px-2 flex-1 overflow-y-auto">
           {links.map((link) => (
             <button
               key={link.key}
@@ -146,9 +159,8 @@ const DashboardLayout = ({ children, activeTab, setActiveTab }) => {
         </nav>
       </aside>
 
-      {/* Main content: ALWAYS fills viewport, only content scrolls */}
+      {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden bg-[#0f172a]">
-        {/* Scrollable dashboard content area */}
         <div className="flex-1 flex flex-col overflow-y-auto">{children}</div>
       </main>
     </div>

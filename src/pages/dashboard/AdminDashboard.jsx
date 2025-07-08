@@ -16,6 +16,8 @@ import ComplaintDashboard from "../admin/complaint/ComplaintDashboard";
 import ComplaintDetail from "../admin/complaint/ComplaintDetail";
 import ToDoDashboard from "../admin/todo/ToDoDashboard"; // <-- Import ToDo
 import CalendarDashboard from "../admin/calendar/CalendarDashboard";
+import EmailMarketingDashboard from "../admin/emailMarketing/EmailMarketingDashboard"; // <-- Import
+import ChatDashboard from "../admin/chat/ChatDashboard";
 
 const AdminDashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -73,9 +75,9 @@ const AdminDashboard = () => {
       case "users":
         return <UserManagement />;
       case "products":
-        return <ProductManagement />;
+        return <ProductManagement />; // Product management
       case "products-management":
-        return <ProductManagementSystem />;
+        return <ProductManagementSystem />; // Correct component for Products Management
       case "blog":
         return <BlogManagement />;
       case "blog-editor":
@@ -106,6 +108,10 @@ const AdminDashboard = () => {
         return <ToDoDashboard />;
       case "calendar":
         return <CalendarDashboard />;
+      case "email-marketing":
+        return <EmailMarketingDashboard />;
+      case "chat":
+        return <ChatDashboard />;
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }
@@ -116,10 +122,10 @@ const AdminDashboard = () => {
       <Navbar />
       <div className="flex flex-1 min-h-0">
         <DashboardLayout
-          activeTab={activeTab.split("-")[0]}
+          activeTab={activeTab} // Pass the activeTab directly (no need to split)
           setActiveTab={setActiveTab}
         >
-          <div className="flex-1 flex flex-col bg-[#0f172a] text-white p-6 overflow-hidden">
+          <div className="flex-1 flex flex-col bg-[#0f172a] text-white p-6 ">
             <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
             <div className="flex-1 min-h-0 overflow-hidden">
               {renderSection()}

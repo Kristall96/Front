@@ -5,7 +5,7 @@ import secureAxios from "../../../../utils/secureAxios";
 // -------------------- ADMIN/MODERATOR HOOKS -------------------- //
 
 // Get list of complaints (with filters and polling)
-export function useComplaints(filters = {}, interval = 1000) {
+export function useComplaints(filters = {}, interval = 30000) {
   return useQuery({
     queryKey: ["complaints", filters],
     queryFn: async () => {
@@ -14,7 +14,7 @@ export function useComplaints(filters = {}, interval = 1000) {
       });
       return data;
     },
-    refetchInterval: interval, // default 60s, override as needed
+    refetchInterval: interval,
     staleTime: 0,
     refetchOnWindowFocus: true,
   });

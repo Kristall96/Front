@@ -103,7 +103,6 @@ const ViewProductModal = ({
         const res = await secureAxios.get("/admin/variant-categories");
 
         const categories = res.data?.categories;
-        console.log("🧩 Variant categories:", categories);
 
         if (!Array.isArray(categories)) {
           throw new TypeError("Expected categories to be an array");

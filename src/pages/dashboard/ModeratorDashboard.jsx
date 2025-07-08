@@ -7,7 +7,8 @@ import ProfileSection from "./sections/ProfileSection";
 import ComplaintDashboard from "../admin/complaint/ComplaintDashboard";
 import ComplaintDetail from "../admin/complaint/ComplaintDetail";
 import ToDoDashboard from "../admin/todo/ToDoDashboard"; // <-- Add this import
-
+import CalendarDashboard from "../admin/calendar/CalendarDashboard";
+import ChatDashboard from "../admin/chat/ChatDashboard";
 const ModeratorDashboard = () => {
   const [userData, setUserData] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -52,6 +53,10 @@ const ModeratorDashboard = () => {
         );
       case "todos":
         return <ToDoDashboard />;
+      case "calendar":
+        return <CalendarDashboard />;
+      case "chat":
+        return <ChatDashboard />;
       default:
         return <p className="text-sm text-red-500">⚠ Unknown section</p>;
     }
